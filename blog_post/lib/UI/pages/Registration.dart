@@ -1,11 +1,14 @@
 import 'package:blog_post/StateManager/profileProvider.dart';
 import 'package:blog_post/UI/pages/Authorization.dart';
+import 'package:blog_post/UI/pages/Profile.dart';
 import 'package:email_validator/email_validator.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RegistrationScreen extends StatelessWidget {
+  const RegistrationScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     ProfileStore profileStoreRead = context.read<ProfileStore>();
@@ -19,14 +22,9 @@ class RegistrationScreen extends StatelessWidget {
             autovalidateMode: AutovalidateMode.onUserInteraction,
             controller: profileStoreWatch.getEmailController,
             onChanged: profileStoreRead.setEmail,
-            decoration: InputDecoration(labelText: 'email'),
-            validator: (value) {
-              if (value == null || value.isEmpty)
-                return "Введите email";
-              else if (!EmailValidator.validate(value))
-                return "Некорректный email";
-              return null;
-            },
+            decoration: InputDecoration(
+                labelText: 'email',
+                errorText: profileStoreRead.getErrorMessageEmail),
           ),
           TextFormField(
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -35,6 +33,7 @@ class RegistrationScreen extends StatelessWidget {
             onChanged: profileStoreRead.setPassword,
             decoration: InputDecoration(
               labelText: 'пароль',
+              errorText: profileStoreRead.getErrorMessagePassword,
               suffixIcon: IconButton(
                   icon: Icon(profileStoreRead.getPasswordVisible
                       ? Icons.visibility
@@ -42,13 +41,6 @@ class RegistrationScreen extends StatelessWidget {
                   onPressed: () => profileStoreRead.changePasswordVisible()),
               alignLabelWithHint: false,
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty)
-                return "Введите пароль";
-              else if (value.length < 8)
-                return "Длина пароля должна быть не меньше 8";
-              return null;
-            },
           ),
           TextFormField(
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -57,6 +49,7 @@ class RegistrationScreen extends StatelessWidget {
             onChanged: profileStoreRead.setPasswordRepeat,
             decoration: InputDecoration(
               labelText: 'подтвердить пароль',
+              errorText: profileStoreRead.getErrorMessagePasswordRepeat,
               suffixIcon: IconButton(
                   icon: Icon(profileStoreRead.getPasswordRepeatVisible
                       ? Icons.visibility
@@ -65,30 +58,30 @@ class RegistrationScreen extends StatelessWidget {
                       profileStoreRead.changePasswordRepeatVisible()),
               alignLabelWithHint: false,
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty)
-                return "Введите пароль";
-              else if (value.length < 8)
-                return "Длина пароля должна быть не меньше 8";
-              else if (!(value == profileStoreRead.getPassword))
-                return "Пароли не совпадают";
-              return null;
-            },
           ),
           ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                if (profileStoreRead.getErrorMessageEmail == null &&
+                    profileStoreRead.getErrorMessagePassword == null &&
+                    profileStoreRead.getErrorMessagePasswordRepeat == null) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProfileScreen()));
+                }
+              },
               style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(
-                      Color.fromRGBO(204, 128, 255, 1))),
-              child: Text("Войти")),
+                  backgroundColor: WidgetStateProperty.all(
+                      const Color.fromRGBO(204, 128, 255, 1))),
+              child: const Text("Войти")),
           InkWell(
-            child: Text("Авторизация"),
+            child: const Text("Авторизация"),
             onTap: () {
               profileStoreRead.setEmptyDataAuthorization();
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => AuthorizationScreen()));
+                      builder: (context) => const AuthorizationScreen()));
             },
           ),
         ],
