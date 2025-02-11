@@ -1,7 +1,6 @@
 import 'package:blog_post/StateManager/profileProvider.dart';
 import 'package:blog_post/UI/pages/Authorization.dart';
-import 'package:blog_post/UI/pages/Profile.dart';
-import 'package:email_validator/email_validator.dart';
+import 'package:blog_post/UI/pages/HomeScreen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -60,14 +59,21 @@ class RegistrationScreen extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                String? response = await profileStoreWatch.sendDataReg();
+                // await profileStoreWatch.getDataAboutUser();
                 if (profileStoreRead.getErrorMessageEmail == null &&
                     profileStoreRead.getErrorMessagePassword == null &&
-                    profileStoreRead.getErrorMessagePasswordRepeat == null) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ProfileScreen()));
+                    profileStoreRead.getErrorMessagePasswordRepeat == null &&
+                    response == null) {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()));
+                } else if (profileStoreRead.getErrorMessageEmail == null &&
+                    profileStoreRead.getErrorMessagePassword == null &&
+                    profileStoreRead.getErrorMessagePasswordRepeat == null &&
+                    response != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(response)));
                 }
               },
               style: ButtonStyle(

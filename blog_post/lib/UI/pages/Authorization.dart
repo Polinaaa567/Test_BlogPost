@@ -1,6 +1,5 @@
 import 'package:blog_post/StateManager/profileProvider.dart';
 import 'package:blog_post/UI/pages/HomeScreen.dart';
-import 'package:blog_post/UI/pages/Profile.dart';
 import 'package:blog_post/UI/pages/Registration.dart';
 
 import 'package:flutter/material.dart';
@@ -43,19 +42,26 @@ class AuthorizationScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  String? response = await profileStoreWatch.sendDataLogin();
+                  await profileStoreWatch.getDataAboutUser();
                   if (profileStoreRead.getErrorMessageEmail == null &&
-                      profileStoreRead.getErrorMessagePassword == null) {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => HomeScreen()));
+                      profileStoreRead.getErrorMessagePassword == null &&
+                      response == null) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()));
+                  } else if (profileStoreRead.getErrorMessageEmail == null &&
+                      profileStoreRead.getErrorMessagePassword == null &&
+                      response != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(response)));
                   }
                 },
                 style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(
                         const Color.fromRGBO(204, 128, 255, 1))),
                 child: const Text("Войти")),
+            // Text(),
             InkWell(
               child: const Text("Зарегистрироваться"),
               onTap: () {

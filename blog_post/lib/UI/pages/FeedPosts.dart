@@ -1,3 +1,4 @@
+import 'package:blog_post/StateManager/postProvider.dart';
 import 'package:blog_post/StateManager/profileProvider.dart';
 
 import 'package:flutter/material.dart';
@@ -6,21 +7,34 @@ import 'package:provider/provider.dart';
 class FeedPostsScreen extends StatelessWidget {
   const FeedPostsScreen({super.key});
 
-  // снизу должна быть менюшка по всем экранам
-
   @override
   Widget build(BuildContext context) {
     ProfileStore profileStoreRead = context.read<ProfileStore>();
     ProfileStore profileStoreWatch = context.watch<ProfileStore>();
 
-    return  Column(
-      children: <Widget>[
-        TextFormField(
-          decoration: const InputDecoration(
-            labelText: "Введите название для поиска"
+    PostStore postStoreRead = context.read<PostStore>();
+    PostStore postStoreWatch = context.watch<PostStore>();
+
+    return DefaultTabController(
+          length: 2,
+          child: Column(
+            children: [
+              TabBar(
+                tabs: [
+                  Tab(text: "Все посты",),
+                  Tab(text: "Мои посты",),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    Center(child: Icon(Icons.directions_car)),
+                    Center(child: Icon(Icons.directions_transit)),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
-    );
+        );
   }
 }
