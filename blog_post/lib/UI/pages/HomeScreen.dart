@@ -8,14 +8,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [
-      FeedPostsScreen(),
-      ProfileScreen(),
-      SettingsScreen()
+    final List<Widget> pages = [
+      const FeedPostsScreen(),
+      const ProfileScreen(),
+      SettingsScreen(),
+
     ];
-    final List<String> _titles = ["Лента постов", "Профиль", "Настройки"];
+    final List<String> titles = ["Лента постов", "Профиль", "Настройки"];
 
     PostStore postStoreRead = context.read<PostStore>();
     PostStore postStoreWatch = context.watch<PostStore>();
@@ -25,9 +28,9 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(_titles[postStoreWatch.getSelectedPagesIndex]),
+          title: Text(titles[postStoreWatch.getSelectedPagesIndex]),
         ),
-        body: _pages[postStoreRead.getSelectedPagesIndex],
+        body: pages[postStoreRead.getSelectedPagesIndex],
         bottomNavigationBar: BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: "Посты"),

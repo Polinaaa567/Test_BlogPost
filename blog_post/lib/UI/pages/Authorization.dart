@@ -1,3 +1,4 @@
+import 'package:blog_post/StateManager/postProvider.dart';
 import 'package:blog_post/StateManager/profileProvider.dart';
 import 'package:blog_post/UI/pages/HomeScreen.dart';
 import 'package:blog_post/UI/pages/Registration.dart';
@@ -12,6 +13,10 @@ class AuthorizationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     ProfileStore profileStoreRead = context.read<ProfileStore>();
     ProfileStore profileStoreWatch = context.watch<ProfileStore>();
+
+    PostStore postStoreRead = context.read<PostStore>();
+    PostStore postStoreWatch = context.watch<PostStore>();
+
 
     return Scaffold(
         appBar: AppBar(title: const Text('Авторизация')),
@@ -45,6 +50,9 @@ class AuthorizationScreen extends StatelessWidget {
                 onPressed: () async {
                   String? response = await profileStoreWatch.sendDataLogin();
                   await profileStoreWatch.getDataAboutUser();
+                  await postStoreWatch.getAllPosts();
+                  await postStoreWatch.fetchMyPosts(profileStoreWatch.getEmail);
+
                   if (profileStoreRead.getErrorMessageEmail == null &&
                       profileStoreRead.getErrorMessagePassword == null &&
                       response == null) {

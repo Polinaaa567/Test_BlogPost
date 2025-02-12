@@ -160,14 +160,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  get_ip_address:
-    dependency: "direct main"
-    description:
-      name: get_ip_address
-      sha256: ad7b1ca2b6f03a247a59bc7dd7e170e495b703b01185dfbb24ae89111531d514
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.7"
   http:
     dependency: "direct main"
     description:
@@ -424,14 +416,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.2"
-  public_ip_address:
-    dependency: "direct main"
-    description:
-      name: public_ip_address
-      sha256: "97d3a69a818c7715a80ba8a63afd9d777ea25812329e92fd00849a9b3191560f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.1"
   sky_engine:
     dependency: transitive
     description: flutter

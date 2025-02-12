@@ -12,7 +12,9 @@ import 'package:image/image.dart' as img;
 import 'package:logger/logger.dart';
 
 class ProfileStore with ChangeNotifier {
-  final _ipAddress = json.decode(jsonS)['ip_address'];
+  IP ipAddress = IP();
+
+  // final _ipAddress = json.decode(jsonS)['ip_address'];
 
   final TextEditingController _emailController = TextEditingController();
   TextEditingController get getEmailController => _emailController;
@@ -159,7 +161,7 @@ class ProfileStore with ChangeNotifier {
   Future<dynamic> sendDataReg() async {
     try {
       final response = await http.post(
-          Uri.parse("http://$_ipAddress:8888/auth/register"),
+          Uri.parse("http://${ipAddress.ipAddress}:8888/auth/register"),
           body: json.encode({'email': _email, 'password': _password}),
           headers: {'Content-Type': 'application/json'});
       if (response.body.contains("false")) {
@@ -177,7 +179,7 @@ class ProfileStore with ChangeNotifier {
   Future<dynamic> sendDataLogin() async {
     try {
       final response = await http.post(
-          Uri.parse("http://$_ipAddress:8888/auth/login"),
+          Uri.parse("http://${ipAddress.ipAddress}:8888/auth/login"),
           body: json.encode({'email': _email, 'password': _password}),
           headers: {'Content-Type': 'application/json'});
       if (response.body.contains("true")) {
@@ -194,15 +196,15 @@ class ProfileStore with ChangeNotifier {
 
   Future<dynamic> sendDataAboutUser() async {
     try {
-      List<int> jpgBytes = img.encodeJpg(_imageAvatar!);
-      Uint8List? imageBytes = Uint8List.fromList(jpgBytes);
+      // List<int> jpgBytes = img.encodeJpg(_imageAvatar);
+      // Uint8List? imageBytes = Uint8List.fromList(jpgBytes);
 
       final response = await http.put(
-          Uri.parse("http://$_ipAddress:8888/profile/save"),
+          Uri.parse("http://${ipAddress.ipAddress}:8888/profile/save"),
           body: json.encode({
             'email': _email,
             "lastName": _lastName,
-            'avatar': imageBytes,
+            'avatar': null,
             'name': _name
           }),
           headers: {'Content-Type': 'application/json'});
@@ -218,54 +220,54 @@ class ProfileStore with ChangeNotifier {
 
   // проблемы с фото и там где есть не null значение
   Future<void> getDataAboutUser() async {
-    final response = await http.post(
-        Uri.parse("http://$_ipAddress:8888/profile/info"),
-        body: json.encode({"email": _email}),
-        headers: {'Content-Type': 'application/json'});
-    if (response.statusCode == 200) {
-      try {
-        final decodedJson = json.decode(response.body);
-
-        List<ProfileInfo> profiles = [];
-        if (decodedJson is List) {
-          for (final element in decodedJson) {
-            if (element != null) {
-              try {
-                profiles.add(ProfileInfo.fromList(element));
-              } catch (e) {
-                Logger().d('Пропущен невалидный элемент: $e');
-              }
-            }
-          }
-        }
-
-        if (profiles.isNotEmpty) {
-          final profile = profiles.first;
-          if (profile.name != null) {
-            _name = profile.name;
-            _nameController.text = profile.name ?? '';
-          }
-          if (profile.lastName != null) {
-            _lastName = profile.lastName;
-            _lastNameController.text = profile.lastName ?? '';
-
-          }
-
-          if (profile.avatar != null && profile.avatar!.isNotEmpty) {
-            _bytes = profile.avatar!;
-          }
-        }
-      } catch (e) {
-        Logger().d('Ошибка при декодировании JSON: $e');
-      }
-    } else {
-      throw Exception("Не удалось загрузить данные");
-    }
+    // final response = await http.post(
+    //     Uri.parse("http://$_ipAddress:8888/profile/info"),
+    //     body: json.encode({"email": _email}),
+    //     headers: {'Content-Type': 'application/json'});
+    // if (response.statusCode == 200) {
+    //   try {
+    //     final decodedJson = json.decode(response.body);
+    //
+    //     List<ProfileInfo> profiles = [];
+    //     if (decodedJson is List) {
+    //       for (final element in decodedJson) {
+    //         if (element != null) {
+    //           try {
+    //             profiles.add(ProfileInfo.fromList(element));
+    //           } catch (e) {
+    //             Logger().d('Пропущен невалидный элемент: $e');
+    //           }
+    //         }
+    //       }
+    //     }
+    //
+    //     if (profiles.isNotEmpty) {
+    //       final profile = profiles.first;
+    //       if (profile.name != null) {
+    //         _name = profile.name;
+    //         _nameController.text = profile.name ?? '';
+    //       }
+    //       if (profile.lastName != null) {
+    //         _lastName = profile.lastName;
+    //         _lastNameController.text = profile.lastName ?? '';
+    //
+    //       }
+    //
+    //       if (profile.avatar != null && profile.avatar!.isNotEmpty) {
+    //         _bytes = profile.avatar!;
+    //       }
+    //     }
+    //   } catch (e) {
+    //     Logger().d('Ошибка при декодировании JSON: $e');
+    //   }
+    // } else {
+    //   throw Exception("Не удалось загрузить данные");
+    // }
   }
 
   Future<void> deleteAccount() async{
      await http.delete(
-        Uri.parse("http://$_ipAddress:8888/profile/delete"),
+        Uri.parse("http://${ipAddress.ipAddress}:8888/profile/delete"),
         body: json.encode({"email": _email}),
         headers: {'Content-Type': 'application/json'});
   }

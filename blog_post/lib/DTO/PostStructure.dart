@@ -1,43 +1,46 @@
-import 'package:image/image.dart' as img;
+import 'dart:typed_data';
 
-class UserData {
-  final img.Image? _imageAvatar;
-  final String _email;
-  final String _password;
-  final String _lastName;
-  final String _name;
+import 'package:logger/logger.dart';
 
-  UserData(this._imageAvatar, this._email, this._password, this._lastName,
-      this._name);
-}
+class Posts {
+  final String? lastName;
+  final String? name;
+  final Uint8List? avatar;
+  final int idPost;
+  final String? headline;
+  final Uint8List? photoPost;
+  final DateTime datePublished;
+  final int? countLike;
+  final int countComments;
+  final String state;
 
-class PostStructure {
-  final DateTime _datePublicationPost;
-  final img.Image? _imageInPost;
-  final String _headline;
-  final UserData _userData;
-  final int _countLike;
-  final String _textPost;
+  Posts(
+      {required this.lastName,
+      required this.name,
+      required this.avatar,
+      required this.idPost,
+      required this.headline,
+      required this.photoPost,
+      required this.datePublished,
+      required this.countLike,
+      required this.countComments,
+      required this.state});
 
-  PostStructure(this._datePublicationPost, this._imageInPost, this._headline,
-      this._userData, this._countLike, this._textPost);
-}
+  factory Posts.fromList(Map<String, dynamic> json) {
+    Logger().d("json: $json");
+    Logger().d("json id_post:  ${json['id_post']}");
 
-class PostDraft {
-  final img.Image? _imageInPost;
-  final String? _headline;
-  final UserData _userData;
-  final String? _textPost;
-
-  PostDraft(this._imageInPost, this._headline, this._userData, this._textPost);
-}
-
-class CommentsStructure {
-  final DateTime _datePublicationComment;
-  final UserData _userDataCommentator;
-  final String _textComment;
-  final PostStructure _postData;
-
-  CommentsStructure(this._datePublicationComment, this._userDataCommentator,
-      this._textComment, this._postData);
+    return Posts(
+        lastName: json['last_name'],
+        name: json['name'],
+        avatar: json['avatar'],
+        idPost: json['id_post'],
+        headline: json['headline'],
+        photoPost: json['photo_post'],
+        datePublished: DateTime.parse(json['date_published']),
+        countLike: json['count_like'],
+    countComments: json['count_comments'],
+    state: json['state'] ?? "all"
+    );
+  }
 }
