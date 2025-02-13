@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
+
 import '../storage/storage.dart';
 
 class PostsRoutes {
@@ -33,6 +35,7 @@ class PostsRoutes {
         break;
       case "/post/find":
         await _getFoundPosts(request);
+        break;
     }
   }
 
@@ -60,9 +63,9 @@ class PostsRoutes {
                   where u.email=@email''', params: {"email": email});
 
         final row = userQuery.first;
-        dynamic isQueryPost;
+
         if (postExists.isNotEmpty) {
-          isQueryPost = await db.execute('''UPDATE posts 
+          await db.execute('''UPDATE posts 
               SET headline=@headline, photo_post=@photo_post, 
               text_post=@text_post, state=@state, 
               date_published=@date_published 
@@ -76,7 +79,7 @@ class PostsRoutes {
             "date_published": datePublished
           });
         } else {
-          isQueryPost = await db.execute('''INSERT INTO posts 
+          await db.execute('''INSERT INTO posts 
               (headline, photo_post, text_post, id_user_creator, state, date_published) 
               VALUES (@headline, @photo_post, @text_post, @id_user_creator, @state, @date_published) 
               returning id_post''', params: {
@@ -87,12 +90,6 @@ class PostsRoutes {
             "state": state,
             "date_published": datePublished
           });
-        }
-
-        if (isQueryPost.isNotEmpty) {
-          await db.execute('''INSERT INTO post_likes 
-          (id_post, count_like) 
-          values (@id_post, 0)''', params: {"id_post": isQueryPost.first[0]});
         }
 
         request.response.close();
@@ -208,18 +205,26 @@ class PostsRoutes {
 
   Future<void> _getAllPosts(HttpRequest request) async {
     try {
-      if (request.method == "GET") {
+      if (request.method == "POST") {
+        final body = await utf8.decodeStream(request);
+        final jsonData = jsonDecode(body);
+
+        final email = jsonData['email'];
+        final userQuery = await db.execute('''Select u.id_user 
+                  from users u 
+                  where email=@email''', params: {"email": email});
+
         final postsQuery = await db.execute(
             '''Select u.last_name, u.name, u.avatar, 
                       p.id_post, p.headline, p.photo_post, p.text_post, p.date_published, 
-                      pl.count_like,
-                      (select count(*) from comments c where c.id_post = p.id_post) as count_comments
+                      (select count(*) from post_likes pl where pl.id_post = p.id_post) as count_like,
+                      (select count(*) from comments c where c.id_post = p.id_post) as count_comments, 
+                      (select count(*) from post_likes pl where pl.id_user = @id_user and pl.id_post=p.id_post) as state_like
                       from posts p 
                       left join users u On p.id_user_creator=u.id_user 
-                      left join post_likes pl on pl.id_post=p.id_post 
                       where p.state=@state 
                       order by date_published desc''',
-            params: {"state": 'published'});
+            params: {"state": 'published', "id_user": userQuery.first[0]});
 
         final List<Map<String, dynamic>> formattedResults =
             postsQuery.map((row) {
@@ -231,9 +236,10 @@ class PostsRoutes {
             'headline': row[4],
             'photo_post': row[5],
             'text_post': row[6],
-            'date_published': (row[7] as DateTime).toIso8601String(),
+            'date_published': DateFormat("dd-MM-yyyy").format(row[7] as DateTime),
             'count_like': row[8],
-            'count_comments': row[9]
+            'count_comments': row[9],
+            'state_like': row[10]
           };
         }).toList();
 
@@ -267,17 +273,21 @@ class PostsRoutes {
                   from users u 
                   where email=@email''', params: {"email": email});
 
-        final postsQuery =
-            await db.execute(''' Select u.last_name, u.name, u.avatar, 
+        final postsQuery = await db
+            .execute(''' Select u.last_name, u.name, u.avatar, 
                   p.id_post, p.headline, p.photo_post, p.text_post, p.date_published, 
-                  pl.count_like,
+                  (SELECT COUNT(*) FROM post_likes pl WHERE pl.id_post = p.id_post) as count_like,
                   (SELECT COUNT(*) FROM comments c WHERE c.id_post = p.id_post) as count_comments,
+                  (select count(*) from post_likes pl where pl.id_user = @id_user and pl.id_post=p.id_post) as state_like,
                   p.state
                   from posts p 
                   left join users u On p.id_user_creator=u.id_user 
-                  left join post_likes pl on pl.id_post=p.id_post 
                   where p.id_user_creator=@id_user_creator
-                ''', params: {"id_user_creator": userQuery.first[0]});
+                  order by date_published desc
+                ''', params: {
+          "id_user_creator": userQuery.first[0],
+          "id_user": userQuery.first[0]
+        });
 
         final List<Map<String, dynamic>> formattedResults =
             postsQuery.map((row) {
@@ -289,10 +299,11 @@ class PostsRoutes {
             'headline': row[4],
             'photo_post': row[5],
             'text_post': row[6],
-            'date_published': (row[7] as DateTime).toIso8601String(),
+            'date_published': DateFormat("dd-MM-yyyy").format(row[7] as DateTime),
             'count_like': row[8],
             'count_comments': row[9],
-            'state': row[10],
+            'state_like': row[10],
+            'state': row[11],
           };
         }).toList();
 
@@ -319,32 +330,35 @@ class PostsRoutes {
       if (request.method == "POST") {
         final body = await utf8.decodeStream(request);
         final jsonData = jsonDecode(body);
-
+        final email = jsonData["email"];
         final idPost = jsonData['idPost'];
 
-        final postsQuery =
-            await db.execute('''Select u.last_name, u.name, u.avatar, 
+        final userQuery = await db.execute('''Select u.id_user 
+                  from users u 
+                  where email=@email''', params: {"email": email});
+
+        final postsQuery = await db.execute(
+            '''Select u.last_name, u.name, u.avatar, 
                   p.id_post, p.headline, p.photo_post, p.text_post, p.date_published, 
-                  pl.count_like, 
-                  (SELECT COUNT(*) FROM comments c WHERE c.id_post = @id_post) as count_comments
+                  (select count(*) from post_likes pl where pl.id_post = @id_post) as count_like, 
+                  (SELECT COUNT(*) FROM comments c WHERE c.id_post = @id_post) as count_comments,
+                  (select count(*) from post_likes pl where pl.id_user = @id_user and pl.id_post=p.id_post) as state_like
                   from posts p 
                   left join users u On p.id_user_creator=u.id_user 
-                  left join post_likes pl on pl.id_post=p.id_post 
-                  where p.id_post=@id_post''', params: {"id_post": idPost});
+                  where p.id_post=@id_post''',
+            params: {"id_post": idPost, "id_user": userQuery.first[0]});
 
         final List<Map<String, dynamic>> formattedResults =
             postsQuery.map((row) {
           return {
-            'last_name': row[0],
-            'name': row[1],
-            'avatar': row[2],
             'id_post': row[3],
             'headline': row[4],
             'photo_post': row[5],
             'text_post': row[6],
-            'date_published': (row[7] as DateTime).toIso8601String(),
+            'date_published': DateFormat("dd-MM-yyyy").format(row[7] as DateTime),
             'count_like': row[8],
-            'count_comments': row[9]
+            'count_comments': row[9],
+            'state_like': row[10],
           };
         }).toList();
 
@@ -368,51 +382,40 @@ class PostsRoutes {
 
   Future<void> _likePost(HttpRequest request) async {
     try {
-      if (request.method == "PUT") {
+      if (request.method == "POST") {
         final body = await utf8.decodeStream(request);
         final jsonData = jsonDecode(body);
 
         final idPost = jsonData['idPost'];
+        final email = jsonData['email'];
         final state = jsonData['state'];
-        print("$idPost + $state");
-        final infoCountLikes = await db.execute('''select pl.count_like 
-                      from post_likes pl 
-                      where pl.id_post=@id_post''',
-            params: {"id_post": idPost});
-        int countLike = int.parse(infoCountLikes.first[0].toString());
-        print(countLike);
 
-        int countLikeLocal = countLike;
-        print(countLikeLocal);
+        print("$idPost + $state");
+
+        final userQuery = await db.execute('''Select u.id_user 
+                  from users u 
+                  where email=@email''', params: {"email": email});
 
         if (state.toString() == "true") {
-          countLikeLocal = countLikeLocal + 1;
-          print("true + $countLikeLocal");
-
-          await db.execute('''update post_likes 
-                        set count_like=@count_like 
-                        where id_post=@id_post''',
-              params: {"count_like": (countLikeLocal), "id_post": idPost});
-
-          print("await work + $countLikeLocal");
+          await db.execute('''
+                          insert into post_likes (id_user, id_post) values (
+                          @id_user, @id_post)''',
+              params: {"id_user": userQuery.first[0], "id_post": idPost});
         } else {
-          if (countLike > 0) {
-            countLikeLocal = countLikeLocal - 1;
-            await db.execute('''update post_likes 
-                          set count_like=@count_like 
-                          where id_post=@id_post''',
-                params: {"count_like": (countLikeLocal), "id_post": idPost});
-          }
+          await db.execute('''delete from post_likes 
+                          where id_post=@id_post And id_user=@id_user''',
+              params: {"id_user": userQuery.first[0], "id_post": idPost});
         }
         final postsQuery = await db.execute('''
-                     select pl.count_like
-                      from  post_likes pl  
-                      where pl.id_post=@id_post 
-            ''', params: {"id_post": idPost});
+                     SELECT COUNT(*) AS count_like,
+                     SUM(CASE WHEN pl.id_user = @id_user THEN 1 ELSE 0 END) AS state_like
+                     FROM post_likes pl 
+                     WHERE pl.id_post = @id_post;
+            ''', params: {"id_post": idPost, "id_user": userQuery.first[0]});
 
         final List<Map<String, dynamic>> formattedResults =
             postsQuery.map((row) {
-          return {'count_like': row[0]};
+          return {'count_like': row[0], 'state_like': row[1]};
         }).toList();
 
         final resultJSON = jsonEncode(formattedResults);
@@ -434,43 +437,99 @@ class PostsRoutes {
 
   Future<void> _getFoundPosts(HttpRequest request) async {
     try {
-      if (request.method == "GET") {
-        final queryParam = request.uri.queryParameters;
-        final searchRequest = queryParam["searchRequest"];
+      if (request.method == "POST") {
+        final body = await utf8.decodeStream(request);
+        final jsonData = jsonDecode(body);
 
-        final searchResult = await db.execute(
-            '''Select u.last_name, u.name, u.avatar, 
-                      p.id_post, p.headline, p.photo_post, p.text_post, p.date_published, 
-                      pl.count_like 
-                      (select count(*) from comments c where c.id_post = p.id_post) as count_comments
-                      from posts p 
-                      left join users u On p.id_user_creator=u.id_user left 
-                      join post_likes pl on pl.id_post=p.id_post 
-                      where Lower(p.headline) like '%' || Lower(@searchRequest) || '%' 
-                            and p.state like @state''',
-            params: {"searchRequest": searchRequest, "state": "published"});
+        final tabPost = jsonData["tabPost"];
+        final email = jsonData["email"];
+        final searchRequest = jsonData["searchRequest"];
+        print("$tabPost, $email, $searchRequest");
 
-        final List<Map<String, dynamic>> formattedResults =
-            searchResult.map((row) {
-          return {
-            'last_name': row[0],
-            'name': row[1],
-            'avatar': row[2],
-            'id_post': row[3],
-            'headline': row[4],
-            'photo_post': row[5],
-            'text_post': row[6],
-            'date_published': (row[7] as DateTime).toIso8601String(),
-            'count_like': row[8],
-            'count_comments': row[9],
-          };
-        }).toList();
+        final userQuery = await db.execute('''Select u.id_user 
+                  from users u 
+                  where email=@email''', params: {"email": email});
 
-        final String resultJSON = jsonEncode(formattedResults);
+        if (tabPost.toString().contains("All")) {
+          final searchResult = await db
+              .execute('''Select u.last_name, u.name, u.avatar, 
+                          p.id_post, p.headline, p.photo_post, p.text_post, p.date_published, 
+                          (Select COUNT(*) FROM post_likes c WHERE c.id_post = p.id_post) as count_like,
+                          (select count(*) from comments c where c.id_post = p.id_post) as count_comments,
+                          (select count(*) from post_likes pl where pl.id_user = @id_user and pl.id_post=p.id_post) as state_like
+                          from posts p 
+                          left join users u On p.id_user_creator=u.id_user 
+                          where Lower(p.headline) like '%' || Lower(@searchRequest) || '%' 
+                                and p.state like @state
+                          order by date_published desc''',
+                  params: {
+                "searchRequest": searchRequest,
+                "state": "published",
+                "id_user": userQuery.first[0]
+              });
+          final List<Map<String, dynamic>> formattedResults =
+              searchResult.map((row) {
+            return {
+              'last_name': row[0],
+              'name': row[1],
+              'avatar': row[2],
+              'id_post': row[3],
+              'headline': row[4],
+              'photo_post': row[5],
+              'text_post': row[6],
+              'date_published': DateFormat("dd-MM-yyyy").format(row[7] as DateTime),
+              'count_like': row[8],
+              'count_comments': row[9],
+              'state_like': row[10],
+            };
+          }).toList();
 
-        request.response
-          ..write(resultJSON)
-          ..close();
+          final String resultJSON = jsonEncode(formattedResults);
+
+          request.response
+            ..write(resultJSON)
+            ..close();
+        } else {
+          final searchResult =
+              await db.execute(''' Select u.last_name, u.name, u.avatar, 
+                  p.id_post, p.headline, p.photo_post, p.text_post, p.date_published, 
+                  (SELECT COUNT(*) FROM post_likes pl WHERE pl.id_post = p.id_post) as count_like,
+                  (SELECT COUNT(*) FROM comments c WHERE c.id_post = p.id_post) as count_comments,
+                  (select count(*) from post_likes pl where pl.id_user = @id_user and pl.id_post=p.id_post) as state_like,
+                  p.state
+                  from posts p 
+                  left join users u On p.id_user_creator=u.id_user 
+                  where Lower(p.headline) like '%' || Lower(@searchRequest) || '%' 
+                        and p.id_user_creator=@id_user_creator
+                  order by date_published desc''', params: {
+            "id_user": userQuery.first[0],
+            "searchRequest": searchRequest,
+            "id_user_creator": userQuery.first[0],
+          });
+          final List<Map<String, dynamic>> formattedResults =
+              searchResult.map((row) {
+            return {
+              'last_name': row[0],
+              'name': row[1],
+              'avatar': row[2],
+              'id_post': row[3],
+              'headline': row[4],
+              'photo_post': row[5],
+              'text_post': row[6],
+              'date_published': DateFormat("dd-MM-yyyy").format(row[7] as DateTime),
+              'count_like': row[8],
+              'count_comments': row[9],
+              'state_like': row[10],
+              'state': row[11]
+            };
+          }).toList();
+
+          final String resultJSON = jsonEncode(formattedResults);
+
+          request.response
+            ..write(resultJSON)
+            ..close();
+        }
       } else {
         request.response
           ..statusCode = HttpStatus.methodNotAllowed
