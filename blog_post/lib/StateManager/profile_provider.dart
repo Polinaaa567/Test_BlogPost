@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:blog_post/DTO/profile.dart';
-import 'package:blog_post/conf.dart';
+import 'package:blog_post/DTO/profile_structure.dart';
+import 'package:blog_post/configure/config.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,10 +13,6 @@ import 'package:image/image.dart' as img;
 import 'package:logger/logger.dart';
 
 class ProfileStore with ChangeNotifier {
-  IP ipAddress = IP();
-
-  // final _ipAddress = json.decode(jsonS)['ip_address'];
-
   final TextEditingController _emailController = TextEditingController();
   TextEditingController get getEmailController => _emailController;
 
@@ -48,6 +45,9 @@ class ProfileStore with ChangeNotifier {
   String? get getErrorMessagePasswordRepeat => _errorMessagePasswordRepeat;
   bool get getPasswordRepeatVisible => _isPasswordRepeatVisible;
 
+  List<ProfileInfo>? _profileInfo = [];
+  List<ProfileInfo>? get getProfileInfo => _profileInfo;
+
   void setEmail(String email) {
     _email = email;
     _validteEmail();
@@ -56,12 +56,13 @@ class ProfileStore with ChangeNotifier {
   }
 
   void _validteEmail() {
-    if (_email.isEmpty)
+    if (_email.isEmpty) {
       _errorMessageEmail = "Введите email";
-    else if (!EmailValidator.validate(_email))
+    } else if (!EmailValidator.validate(_email)) {
       _errorMessageEmail = "Некорректный email";
-    else
+    } else {
       _errorMessageEmail = null;
+    }
   }
 
   void setPassword(String passwd) {
@@ -72,12 +73,13 @@ class ProfileStore with ChangeNotifier {
   }
 
   void _validatePassword() {
-    if (_password.isEmpty)
+    if (_password.isEmpty) {
       _errorMessagePassword = "Введите пароль";
-    else if (_password.length < 8)
+    } else if (_password.length < 8) {
       _errorMessagePassword = "Длина пароля должна быть не меньше 8";
-    else
+    } else {
       _errorMessagePassword = null;
+    }
   }
 
   void setPasswordRepeat(String passwd) {
@@ -88,14 +90,15 @@ class ProfileStore with ChangeNotifier {
   }
 
   void _validatePasswordRepeat() {
-    if (_passwordRepeat.isEmpty)
+    if (_passwordRepeat.isEmpty) {
       _errorMessagePasswordRepeat = "Введите пароль";
-    else if (_passwordRepeat.length < 8)
+    } else if (_passwordRepeat.length < 8) {
       _errorMessagePasswordRepeat = "Длина пароля должна быть не меньше 8";
-    else if (_passwordRepeat != _password)
+    } else if (_passwordRepeat != _password) {
       _errorMessagePasswordRepeat = "Пароли не совпадают";
-    else
+    } else {
       _errorMessagePasswordRepeat = null;
+    }
   }
 
   void changePasswordVisible() {
@@ -127,7 +130,8 @@ class ProfileStore with ChangeNotifier {
 
   String? _name = "";
   String? _lastName = "";
-  img.Image? _imageAvatar = null;
+
+  img.Image? _imageAvatar;
   Uint8List _bytes = Uint8List(0);
 
   String? get getName => _name;
@@ -151,9 +155,6 @@ class ProfileStore with ChangeNotifier {
 
     if (pickedFile != null) {
       _imageAvatar = img.decodeImage(File(pickedFile.path).readAsBytesSync());
-
-      Logger().d(_imageAvatar?.data);
-
       notifyListeners();
     }
   }
@@ -161,7 +162,7 @@ class ProfileStore with ChangeNotifier {
   Future<dynamic> sendDataReg() async {
     try {
       final response = await http.post(
-          Uri.parse("http://${ipAddress.ipAddress}:8888/auth/register"),
+          Uri.parse("http://${MyIP.ipAddress}:8888/auth/register"),
           body: json.encode({'email': _email, 'password': _password}),
           headers: {'Content-Type': 'application/json'});
       if (response.body.contains("false")) {
@@ -179,7 +180,7 @@ class ProfileStore with ChangeNotifier {
   Future<dynamic> sendDataLogin() async {
     try {
       final response = await http.post(
-          Uri.parse("http://${ipAddress.ipAddress}:8888/auth/login"),
+          Uri.parse("http://${MyIP.ipAddress}:8888/auth/login"),
           body: json.encode({'email': _email, 'password': _password}),
           headers: {'Content-Type': 'application/json'});
       if (response.body.contains("true")) {
@@ -196,15 +197,14 @@ class ProfileStore with ChangeNotifier {
 
   Future<dynamic> sendDataAboutUser() async {
     try {
-      // List<int> jpgBytes = img.encodeJpg(_imageAvatar);
-      // Uint8List? imageBytes = Uint8List.fromList(jpgBytes);
+      dynamic jpgBytes = img.encodeJpg(_imageAvatar!);
 
       final response = await http.put(
-          Uri.parse("http://${ipAddress.ipAddress}:8888/profile/save"),
+          Uri.parse("http://${MyIP.ipAddress}:8888/profile/save"),
           body: json.encode({
             'email': _email,
             "lastName": _lastName,
-            'avatar': null,
+            'avatar': jpgBytes,
             'name': _name
           }),
           headers: {'Content-Type': 'application/json'});
@@ -218,57 +218,44 @@ class ProfileStore with ChangeNotifier {
     }
   }
 
-  // проблемы с фото и там где есть не null значение
   Future<void> getDataAboutUser() async {
-    // final response = await http.post(
-    //     Uri.parse("http://$_ipAddress:8888/profile/info"),
-    //     body: json.encode({"email": _email}),
-    //     headers: {'Content-Type': 'application/json'});
-    // if (response.statusCode == 200) {
-    //   try {
-    //     final decodedJson = json.decode(response.body);
-    //
-    //     List<ProfileInfo> profiles = [];
-    //     if (decodedJson is List) {
-    //       for (final element in decodedJson) {
-    //         if (element != null) {
-    //           try {
-    //             profiles.add(ProfileInfo.fromList(element));
-    //           } catch (e) {
-    //             Logger().d('Пропущен невалидный элемент: $e');
-    //           }
-    //         }
-    //       }
-    //     }
-    //
-    //     if (profiles.isNotEmpty) {
-    //       final profile = profiles.first;
-    //       if (profile.name != null) {
-    //         _name = profile.name;
-    //         _nameController.text = profile.name ?? '';
-    //       }
-    //       if (profile.lastName != null) {
-    //         _lastName = profile.lastName;
-    //         _lastNameController.text = profile.lastName ?? '';
-    //
-    //       }
-    //
-    //       if (profile.avatar != null && profile.avatar!.isNotEmpty) {
-    //         _bytes = profile.avatar!;
-    //       }
-    //     }
-    //   } catch (e) {
-    //     Logger().d('Ошибка при декодировании JSON: $e');
-    //   }
-    // } else {
-    //   throw Exception("Не удалось загрузить данные");
-    // }
+    try {
+      final response = await http.post(
+          Uri.parse("http://${MyIP.ipAddress}:8888/profile"),
+          body: json.encode({"email": _email}),
+          headers: {'Content-Type': 'application/json'});
+      if (response.statusCode == 200) {
+        try {
+          List<dynamic> jsonData = json.decode(response.body);
+          _profileInfo =
+              jsonData.map((elem) => ProfileInfo.fromList(elem)).toList();
+
+          for (var info in _profileInfo!) {
+            _nameController.text = info.name ?? "";
+            _lastNameController.text = info.lastName ?? "";
+
+            _bytes = info.avatar.isNotEmpty ? info.avatar : Uint8List(0);
+            _lastName = info.lastName ?? "";
+            _name = info.name ?? "";
+
+            notifyListeners();
+          }
+        } catch (e) {
+          Logger().d('Ошибка при парсинге JSON: $e');
+        }
+      } else {
+        throw Exception("Не удалось загрузить данные");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
-  Future<void> deleteAccount() async{
-     await http.delete(
-        Uri.parse("http://${ipAddress.ipAddress}:8888/profile/delete"),
+  Future<void> deleteAccount() async {
+    await http.delete(Uri.parse("http://${MyIP.ipAddress}:8888/profile/delete"),
         body: json.encode({"email": _email}),
         headers: {'Content-Type': 'application/json'});
   }
+
 }
+

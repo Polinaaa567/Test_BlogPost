@@ -1,7 +1,7 @@
-import 'package:blog_post/StateManager/postProvider.dart';
-import 'package:blog_post/StateManager/profileProvider.dart';
-import 'package:blog_post/UI/pages/HomeScreen.dart';
-import 'package:blog_post/UI/pages/Registration.dart';
+import 'package:blog_post/StateManager/post_provider.dart';
+import 'package:blog_post/StateManager/profile_provider.dart';
+import 'package:blog_post/UI/pages/home_screen.dart';
+import 'package:blog_post/UI/pages/registration.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -48,22 +48,23 @@ class AuthorizationScreen extends StatelessWidget {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  String? response = await profileStoreWatch.sendDataLogin();
                   await profileStoreWatch.getDataAboutUser();
-                  await postStoreWatch.getAllPosts();
-                  await postStoreWatch.fetchMyPosts(profileStoreWatch.getEmail);
 
-                  if (profileStoreRead.getErrorMessageEmail == null &&
-                      profileStoreRead.getErrorMessagePassword == null &&
-                      response == null) {
+                  await postStoreWatch.fetchAllPosts(profileStoreWatch.getEmail);
+                  await postStoreWatch.fetchMyPosts(profileStoreWatch.getEmail);
+                  //
+                  // String? response = await profileStoreWatch.sendDataLogin();
+                  // if (profileStoreRead.getErrorMessageEmail == null &&
+                  //     profileStoreRead.getErrorMessagePassword == null &&
+                  //     response == null) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => HomeScreen()));
-                  } else if (profileStoreRead.getErrorMessageEmail == null &&
-                      profileStoreRead.getErrorMessagePassword == null &&
-                      response != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(response)));
-                  }
+                  // } else if (profileStoreRead.getErrorMessageEmail == null &&
+                  //     profileStoreRead.getErrorMessagePassword == null &&
+                  //     response != null) {
+                  //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  //       content: Text(response)));
+                  // }
                 },
                 style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(

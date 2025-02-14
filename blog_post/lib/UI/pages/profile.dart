@@ -1,9 +1,7 @@
-import 'package:blog_post/StateManager/profileProvider.dart';
+import 'package:blog_post/StateManager/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image/image.dart' as img;
-
-// аватар?
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

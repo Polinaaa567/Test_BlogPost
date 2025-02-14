@@ -1,13 +1,17 @@
-import 'package:blog_post/StateManager/postProvider.dart';
-import 'package:blog_post/StateManager/profileProvider.dart';
-import 'package:blog_post/UI/pages/Authorization.dart';
+import 'package:blog_post/StateManager/comment_probider.dart';
+import 'package:blog_post/StateManager/home_screen_provider.dart';
+import 'package:blog_post/StateManager/post_provider.dart';
+import 'package:blog_post/StateManager/profile_provider.dart';
+import 'package:blog_post/UI/pages/authorization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ProfileStore()),
-        ChangeNotifierProvider(create: (context) => PostStore())
+        ChangeNotifierProvider(create: (context) => PostStore()),
+        ChangeNotifierProvider(create: (context) => HomeScreenProvider()),
+        ChangeNotifierProvider(create: (context) => CommentsProvider())
       ],
       child: const BlogPost(),
     ));

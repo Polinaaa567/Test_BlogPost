@@ -1,6 +1,6 @@
-import 'package:blog_post/StateManager/profileProvider.dart';
-import 'package:blog_post/UI/pages/Authorization.dart';
-import 'package:blog_post/UI/pages/HomeScreen.dart';
+import 'package:blog_post/StateManager/profile_provider.dart';
+import 'package:blog_post/UI/pages/authorization.dart';
+import 'package:blog_post/UI/pages/home_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

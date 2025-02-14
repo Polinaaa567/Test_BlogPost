@@ -30,7 +30,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-./lib/conf.dart
+./lib/configure/
 # Symbolication related
 app.*.symbols
 
