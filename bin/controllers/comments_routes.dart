@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:intl/intl.dart';
+
 import '../storage/storage.dart';
 
 class CommentsRoutes {
@@ -36,7 +38,7 @@ class CommentsRoutes {
             commentsInPost.map((row) {
           return {
             'text_comment': row[0],
-            'date_creator': (row[1] as DateTime).toIso8601String(),
+            'date_creator': DateFormat("dd-MM-yyyy").format(row[1] as DateTime),
             'last_name': row[2],
             'name': row[3],
             'avatar': row[4],
@@ -97,7 +99,7 @@ class CommentsRoutes {
             commentsInPost.map((row) {
           return {
             'text_comment': row[0],
-            'date_creator': (row[1] as DateTime).toIso8601String(),
+            'date_creator': DateFormat("dd-MM-yyyy").format(row[1] as DateTime),
             'last_name': row[2],
             'name': row[3],
             'avatar': row[4],
