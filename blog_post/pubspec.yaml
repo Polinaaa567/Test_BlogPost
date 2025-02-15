@@ -36,7 +36,6 @@ dependencies:
   http: ^1.3.0
   intl: ^0.20.2
 
-
   flutter:
     sdk: flutter
 
@@ -62,11 +61,18 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  fonts:
+    - family: DeliciousHandrawn
+      fonts:
+        - asset: fonts/DeliciousHandrawn-Regular.ttf
+    - family: Caveat
+      fonts:
+        - asset: fonts/Caveat-VariableFont_wght.ttf
+    - family: PlayfairDisplay
+      fonts:
+        - asset: fonts/PlayfairDisplay-VariableFont_wght.ttf
+        - asset: fonts/PlayfairDisplay-italic-VariableFont_wght.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

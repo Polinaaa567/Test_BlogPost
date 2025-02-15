@@ -49,6 +49,5 @@ class SettingsScreen extends StatelessWidget {
       ],
     );
 
-    throw UnimplementedError();
   }
 }

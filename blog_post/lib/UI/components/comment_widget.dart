@@ -26,58 +26,58 @@ class ModalCommentWidget extends StatelessWidget {
         Column(
           children: commentStoreRead.allComments!
               .map((comment) => Column(
-            children: [
-              Row(
-                children: [
-                  ClipOval(
-                      child: comment.avatar.isNotEmpty
-                          ? Image.memory(
-                        comment.avatar,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      )
-                          : Container(
-                        width: 50,
-                        height: 50,
-                        color: Colors.grey,
-                        child: const Icon(
-                          Icons.person,
-                          size: 25,
-                          color: Colors.white,
-                        ),
-                      )),
-                  const Padding(padding: EdgeInsets.only(left: 10)),
-                  Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
+                          ClipOval(
+                              child: comment.avatar.isNotEmpty
+                                  ? Image.memory(
+                                      comment.avatar,
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      width: 50,
+                                      height: 50,
+                                      color: Colors.grey,
+                                      child: const Icon(
+                                        Icons.person,
+                                        size: 25,
+                                        color: Colors.white,
+                                      ),
+                                    )),
+                          const Padding(padding: EdgeInsets.only(left: 10)),
+                          Expanded(
+                              child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // убрать для null
-                              Text(comment.lastName ?? "anonimus"),
-                              const Padding(
-                                  padding: EdgeInsets.only(left: 8)),
-                              Text(comment.name ?? "98")
+                              Row(
+                                children: [
+                                  // убрать для null
+                                  Text(comment.lastName ?? "anonimus"),
+                                  const Padding(
+                                      padding: EdgeInsets.only(left: 8)),
+                                  Text(comment.name ?? "98")
+                                ],
+                              ),
+                              Container(
+                                constraints: BoxConstraints(maxHeight: 60),
+                                child: Text(
+                                  comment.textComment,
+                                  textDirection: TextDirection.ltr,
+                                  softWrap: true,
+                                ),
+                              ),
+                              Text(
+                                  "${comment.dateCreator.day}.${comment.dateCreator.month}.${comment.dateCreator.year}")
                             ],
-                          ),
-                          Container(
-                            constraints: BoxConstraints(maxHeight: 60),
-                            child: Text(
-                              comment.textComment,
-                              textDirection: TextDirection.ltr,
-                              softWrap: true,
-                            ),
-                          ),
-                          Text(
-                              "${comment.dateCreator.day}.${comment.dateCreator.month}.${comment.dateCreator.year}")
+                          )),
                         ],
-                      )),
-                ],
-              ),
-              const Padding(padding: EdgeInsets.only(top: 8)),
-            ],
-          ))
+                      ),
+                      const Padding(padding: EdgeInsets.only(top: 8)),
+                    ],
+                  ))
               .toList(),
         ),
       ],

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
@@ -48,7 +47,7 @@ class Posts {
       datePublished: DateFormat('dd-MM-yyyy').parse(json['date_published']),
       countLike: json['count_like'],
       countComments: json['count_comments'],
-      stateLike: (json['state_like'] == 0) ? false : true,
+      stateLike: (json['state_like'] == 0 || json['state_like'] == null) ? false : true,
       state: json['state'] ?? "all",
     );
   }

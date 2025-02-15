@@ -13,6 +13,15 @@ import 'package:image/image.dart' as img;
 import 'package:logger/logger.dart';
 
 class ProfileStore with ChangeNotifier {
+  bool _isAuth = true;
+  bool get isAuth => _isAuth;
+  void changeIsAuth() {
+    _isAuth = !_isAuth;
+    notifyListeners();
+  }
+
+
+
   final TextEditingController _emailController = TextEditingController();
   TextEditingController get getEmailController => _emailController;
 
@@ -47,6 +56,17 @@ class ProfileStore with ChangeNotifier {
 
   List<ProfileInfo>? _profileInfo = [];
   List<ProfileInfo>? get getProfileInfo => _profileInfo;
+
+  bool _isUserAuth = false;
+  bool get isUserAuth => _isUserAuth;
+  void changeIsUserAuth() {
+    _isUserAuth = !_isUserAuth;
+    notifyListeners();
+  }
+  void setIsUserAuth(bool isUserAuth) {
+    _isUserAuth = isUserAuth;
+    notifyListeners();
+  }
 
   void setEmail(String email) {
     _email = email;
@@ -118,6 +138,9 @@ class ProfileStore with ChangeNotifier {
     _emailController.clear();
     _repeatPasswordController.clear();
     _passwordController.clear();
+    _errorMessagePassword = "";
+    _errorMessageEmail = "";
+    _errorMessagePasswordRepeat = "";
 
     notifyListeners();
   }
@@ -165,8 +188,8 @@ class ProfileStore with ChangeNotifier {
           Uri.parse("http://${MyIP.ipAddress}:8888/auth/register"),
           body: json.encode({'email': _email, 'password': _password}),
           headers: {'Content-Type': 'application/json'});
-      if (response.body.contains("false")) {
-        return "Пользователь с таким email существует";
+      if (!response.body.contains("true")) {
+        return utf8.decode(response.bodyBytes);
       } else {
         return null;
       }
@@ -256,6 +279,4 @@ class ProfileStore with ChangeNotifier {
         body: json.encode({"email": _email}),
         headers: {'Content-Type': 'application/json'});
   }
-
 }
-

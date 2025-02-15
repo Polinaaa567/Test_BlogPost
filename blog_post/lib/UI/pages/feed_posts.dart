@@ -197,8 +197,8 @@ class PostWidget extends StatelessWidget {
                         ),
                       ),
                       Container(
-              padding: EdgeInsets.all(8),
-                              child: TextFormField(
+                          padding: EdgeInsets.all(8),
+                          child: TextFormField(
                             keyboardType: TextInputType.multiline,
                             maxLines: null,
                             controller:
@@ -242,6 +242,7 @@ class FeedPostsScreen extends StatelessWidget {
 
     return DefaultTabController(
       length: 2,
+      initialIndex: postStoreWatch.getCurrentTab == "My" ? 0 : 1,
       child: Column(
         children: [
           const TabBar(
@@ -279,8 +280,8 @@ class FeedPostsScreen extends StatelessWidget {
                                         '') ...[
                                       IconButton(
                                         onPressed: () async {
-                                          await postStoreWatch.searhPosts(
-                                              profileStoreRead.getEmail, "My");
+                                          await postStoreWatch.searchPosts(
+                                              profileStoreRead.getEmail, profileStoreRead.isUserAuth);
                                         },
                                         icon: Icon(Icons.search),
                                       ),
@@ -323,8 +324,8 @@ class FeedPostsScreen extends StatelessWidget {
                                 if (postStoreWatch.getSearchTextAll != '') ...[
                                   IconButton(
                                     onPressed: () async {
-                                      await postStoreWatch.searhPosts(
-                                          profileStoreRead.getEmail, "All");
+                                      await postStoreWatch.searchPosts(
+                                          profileStoreRead.getEmail, profileStoreRead.isUserAuth);
                                     },
                                     icon: Icon(Icons.search),
                                   ),
@@ -362,4 +363,3 @@ class FeedPostsScreen extends StatelessWidget {
 
   const FeedPostsScreen({super.key});
 }
-

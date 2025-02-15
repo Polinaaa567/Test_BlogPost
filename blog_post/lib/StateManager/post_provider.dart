@@ -21,6 +21,14 @@ class PostStore with ChangeNotifier {
     notifyListeners();
   }
 
+  String _currentTab = 'My';
+  String get getCurrentTab => _currentTab;
+
+  void setCurrentTab(String tab) {
+    _currentTab = tab;
+    notifyListeners();
+  }
+
   List<GroupedPosts>? _groupedPostsAll;
   List<GroupedPosts>? _groupedPostsMy;
 
@@ -83,7 +91,7 @@ class PostStore with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllPosts(String email) async {
+  Future<void> fetchAllPosts(String? email) async {
     try {
       final response = await http.post(
           Uri.parse("http://${MyIP.ipAddress}:8888/post"),
@@ -229,13 +237,16 @@ class PostStore with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> searhPosts(String email, String state) async {
-    if (state == "All") {
+  Future<void> searchPosts(String? email, bool isUserAuth) async {
+    if (_currentTab == "All") {
+      if(!isUserAuth) {
+        email = null;
+      }
       final response = await http.post(
           Uri.parse("http://${MyIP.ipAddress}:8888/post/find"),
           body: json.encode({
-            "tabPost": state,
-            "email": email,
+            "tabPost": _currentTab,
+            "email": email ,
             "searchRequest": _searchTextAll
           }),
           headers: {'Content-Type': 'application/json'});
@@ -244,7 +255,7 @@ class PostStore with ChangeNotifier {
           List<dynamic> jsonData = json.decode(response.body);
 
           _postsAll = jsonData.map((elem) => Posts.fromList(elem)).toList();
-          Logger().d("searhPostsAll: $state, $email, $_searchTextAll");
+          Logger().d("searhPostsAll: $_currentTab, $email, $_searchTextAll");
           groupPostsAll();
 
           notifyListeners();
@@ -253,11 +264,11 @@ class PostStore with ChangeNotifier {
         }
       }
     } else {
-      Logger().d("searhPostsMy: $state, $email, $_searchTextMy");
+      Logger().d("searhPostsMy: $_currentTab, $email, $_searchTextMy");
       final response = await http.post(
           Uri.parse("http://${MyIP.ipAddress}:8888/post/find"),
           body: json.encode({
-            "tabPost": state,
+            "tabPost": _currentTab,
             "email": email,
             "searchRequest": _searchTextMy
           }),
@@ -267,7 +278,7 @@ class PostStore with ChangeNotifier {
           List<dynamic> jsonData = json.decode(response.body);
 
           _postsMy = jsonData.map((elem) => Posts.fromList(elem)).toList();
-          Logger().d("searhPostsMy: $state, $email, $_searchTextMy");
+          Logger().d("searhPostsMy: $_currentTab, $email, $_searchTextMy");
           groupPostsMy();
 
           notifyListeners();

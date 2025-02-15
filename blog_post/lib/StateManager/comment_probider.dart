@@ -41,8 +41,7 @@ class CommentsProvider with ChangeNotifier {
   // Сейчас не меняется кол-во комментариев в списках постов
   Future<void> newComment(int idPost, String email) async {
     Logger().d("я здесь");
-    if(commentText != "") {
-
+    if (commentText != "") {
       final response = await http.post(
           Uri.parse("http://${MyIP.ipAddress}:8888/comments/new"),
           body: json.encode(

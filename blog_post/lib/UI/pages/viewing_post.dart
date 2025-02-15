@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ViewingPostScreen extends StatelessWidget {
+  const ViewingPostScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

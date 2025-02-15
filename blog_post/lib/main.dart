@@ -19,7 +19,6 @@ void main() => runApp(MultiProvider(
 class BlogPost extends StatelessWidget {
   const BlogPost({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(

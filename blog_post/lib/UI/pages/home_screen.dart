@@ -1,5 +1,7 @@
 import 'package:blog_post/StateManager/home_screen_provider.dart';
+import 'package:blog_post/StateManager/profile_provider.dart';
 import 'package:blog_post/UI/pages/feed_posts.dart';
+import 'package:blog_post/UI/pages/feed_screen.dart';
 import 'package:blog_post/UI/pages/profile.dart';
 import 'package:blog_post/UI/pages/settigs.dart';
 import 'package:blog_post/UI/pages/viewing_post.dart';
@@ -12,37 +14,40 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      const FeedPostsScreen(),
-      const ProfileScreen(),
-      SettingsScreen(),
-      ViewingPostScreen()
-    ];
-    final List<String> titles = ["Лента постов", "Профиль", "Настройки"];
+    HomeScreenProvider homeScreenProviderRead =
+        context.read<HomeScreenProvider>();
+    HomeScreenProvider homeScreenProviderWatch =
+        context.watch<HomeScreenProvider>();
 
-    HomeScreenProvider homeScreenProviderRead = context.read<HomeScreenProvider>();
-    HomeScreenProvider homeScreenProviderWatch = context.watch<HomeScreenProvider>();
+    ProfileStore profileStoreRead = context.read<ProfileStore>();
+    ProfileStore profileStoreWatch = context.watch<ProfileStore>();
+
+    final List<Widget> pages = [
+      FeedScreen(),
+      if (profileStoreRead.isUserAuth) const ProfileScreen(),
+      SettingsScreen(),
+    ];
+
+    List<BottomNavigationBarItem> bottomNavItems = [
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.home),
+        label: "Посты",
+      ),
+      if (profileStoreRead.isUserAuth)
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: "Профиль",
+        ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.settings),
+        label: "Настройки",
+      )
+    ];
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(titles[homeScreenProviderRead.getSelectedPagesIndex]),
-        ),
         body: pages[homeScreenProviderRead.getSelectedPagesIndex],
         bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: "Посты",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: "Профиль",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: "Настройки",
-              )
-            ],
+            items: bottomNavItems,
             currentIndex: homeScreenProviderRead.getSelectedPagesIndex,
             onTap: (index) async {
               homeScreenProviderRead.setSelectedPagesIndex(index);
