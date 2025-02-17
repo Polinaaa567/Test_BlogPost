@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:core';
-import 'package:blog_post/DTO/grouped_posts.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
-
-import 'package:blog_post/DTO/post_structure.dart';
-import 'package:blog_post/configure/config.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'package:blog_post/Entities/grouped_posts.dart';
+import 'package:blog_post/Entities/post_structure.dart';
+import 'package:blog_post/configure/config.dart';
 
 class PostStore with ChangeNotifier {
   List<Posts>? _postsAll = [];
@@ -77,9 +80,11 @@ class PostStore with ChangeNotifier {
     }
   }
 
-  void toggleGroupExpansion(int index, bool isMyPosts) {
+  void toggleGroupExpansion(
+    int index,
+  ) {
     final List<GroupedPosts>? postsList =
-        isMyPosts ? _groupedPostsMy : _groupedPostsAll;
+        _currentTab.contains("My") ? _groupedPostsMy : _groupedPostsAll;
 
     if (postsList != null && index < postsList.length) {
       postsList[index] = GroupedPosts(
@@ -151,7 +156,7 @@ class PostStore with ChangeNotifier {
     Logger().d(_postsMy);
   }
 
-  Future<void> fetchLikedPosts(Posts elem, String email, bool isMyPosts) async {
+  Future<void> fetchLikedPosts(Posts elem, String email) async {
     elem.stateLike = !elem.stateLike;
     notifyListeners();
 
@@ -170,7 +175,7 @@ class PostStore with ChangeNotifier {
           elem.countLike = item["count_like"];
           notifyListeners();
 
-          if (isMyPosts) {
+          if (_currentTab.contains("My")) {
             for (var i in _postsAll!) {
               if (i.idPost == elem.idPost) {
                 i.countLike = item["count_like"];
@@ -195,7 +200,19 @@ class PostStore with ChangeNotifier {
   List<Posts>? _postOneInfo = [];
   List<Posts>? get getPostOneInfo => _postOneInfo;
 
-  Future<void> fetchPostInfo(int idPost, String email) async {
+  bool _isThisEdit = false;
+  bool get isThisEdit => _isThisEdit;
+
+  void setIsThisEdit(bool isThisEdit) {
+    _isThisEdit = isThisEdit;
+
+    notifyListeners();
+  }
+
+  Future<void> fetchPostInfo(int idPost, String? email, bool isUserAuth) async {
+    if (!isUserAuth) {
+      email = null;
+    }
     final response = await http.post(
         Uri.parse("http://${MyIP.ipAddress}:8888/post/info"),
         body: json.encode({"idPost": idPost, "email": email}),
@@ -206,6 +223,19 @@ class PostStore with ChangeNotifier {
         _postOneInfo = jsonData.map((elem) => Posts.fromList(elem)).toList();
 
         notifyListeners();
+        Logger().d("headlineeeeeee: $_isThisEdit");
+
+        if (_isThisEdit) {
+          for (var elem in _postOneInfo!) {
+            _headline = elem.headline ?? "";
+            _textPost = elem.textPost ?? "";
+            _headlineController.text = elem.headline ?? "";
+            _textPostController.text = elem.textPost ?? "";
+            _listPhotoPost = elem.photoPost ?? Uint8List(0);
+            _idPost = elem.idPost;
+            notifyListeners();
+          }
+        }
       } catch (e) {
         throw Exception(e);
       }
@@ -239,14 +269,14 @@ class PostStore with ChangeNotifier {
 
   Future<void> searchPosts(String? email, bool isUserAuth) async {
     if (_currentTab == "All") {
-      if(!isUserAuth) {
+      if (!isUserAuth) {
         email = null;
       }
       final response = await http.post(
           Uri.parse("http://${MyIP.ipAddress}:8888/post/find"),
           body: json.encode({
             "tabPost": _currentTab,
-            "email": email ,
+            "email": email,
             "searchRequest": _searchTextAll
           }),
           headers: {'Content-Type': 'application/json'});
@@ -300,6 +330,141 @@ class PostStore with ChangeNotifier {
     _searchTextAllController.clear();
     _searchTextAll = '';
 
+    notifyListeners();
+  }
+
+  String setCountPosts(int count) {
+    count = count % 10;
+
+    if (count > 4 || (count >= 10 && count < 15)) {
+      return "постов";
+    } else if (count > 1) {
+      return "поста";
+    }
+    return "пост";
+  }
+
+  bool _isOnePostInfo = false;
+  bool get isOnePostInfo => _isOnePostInfo;
+
+  void setIsOnePostInfo() {
+    _isOnePostInfo = !isOnePostInfo;
+    notifyListeners();
+  }
+
+  Future<void> createNewPublishedPost(String email) async {
+    try {
+      List<int>? jpgBytes;
+
+      if (_imagePost != null) {
+        jpgBytes = img.encodeJpg(_imagePost!);
+      }
+      await http
+          .post(Uri.parse("http://${MyIP.ipAddress}:8888/post/new/published"),
+              body: json.encode({
+                "idPost": _idPost ?? null,
+                "email": email,
+                "headline": _headline,
+                "photoPost": jpgBytes != null
+                    ? jpgBytes
+                    : (_listPhotoPost.isNotEmpty)
+                        ? _listPhotoPost
+                        : null,
+                "textPost": _textPost
+              }),
+              headers: {'Content-Type': 'application/json'});
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<void> createNewDraftPost(String email) async {
+    try {
+      List<int>? jpgBytes;
+
+      if (_imagePost != null) {
+        jpgBytes = img.encodeJpg(_imagePost!);
+      }
+
+      await http.post(Uri.parse("http://${MyIP.ipAddress}:8888/post/new/draft"),
+          body: json.encode({
+            "idPost": _idPost ?? null,
+            "email": email,
+            "headline": _headline,
+            "photoPost": jpgBytes != null
+                ? jpgBytes
+                : (_listPhotoPost.isNotEmpty)
+                    ? _listPhotoPost
+                    : null,
+            "textPost": _textPost
+          }),
+          headers: {'Content-Type': 'application/json'});
+    } catch (e) {
+      throw "Произошла ошибка: $e";
+    }
+  }
+
+  int? _idPost = 0;
+  int? get getIdPost => _idPost;
+
+  Uint8List _listPhotoPost = Uint8List(0);
+  Uint8List get listPhotoPost => _listPhotoPost;
+
+  final TextEditingController _headlineController = TextEditingController();
+  TextEditingController get getHeadlineController => _headlineController;
+
+  String _headline = "";
+  String get getHeadline => _headline;
+
+  void setHeadline(String text) {
+    _headline = text;
+    notifyListeners();
+  }
+
+  img.Image? _imagePost;
+  img.Image? get getImagePost => _imagePost;
+
+  Future<void> getImageFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      _imagePost = img.decodeImage(File(pickedFile.path).readAsBytesSync());
+      notifyListeners();
+    }
+  }
+
+  final TextEditingController _textPostController = TextEditingController();
+  TextEditingController get getTextPostController => _textPostController;
+
+  String _textPost = "";
+  String get getTextPost => _textPost;
+
+  void setTextPost(String text) {
+    _textPost = text;
+    notifyListeners();
+  }
+
+  void clearPostsEdit() {
+    _headlineController.clear();
+    _textPostController.clear();
+    _textPost = '';
+    _headline = '';
+    _listPhotoPost = Uint8List(0);
+    _imagePost = null;
+    _idPost = 0;
+    _isPublished = false;
+    // _postsAll =[];
+    _postOneInfo = [];
+    notifyListeners();
+
+  }
+
+  bool _isPublished = false;
+  bool get isPublished => _isPublished;
+
+  void changePublication() {
+    _isPublished = !_isPublished;
     notifyListeners();
   }
 }

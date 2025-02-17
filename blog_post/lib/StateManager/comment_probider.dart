@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:blog_post/DTO/comment_structure.dart';
+import 'package:blog_post/Entities/comment_structure.dart';
 import 'package:blog_post/configure/config.dart';
 import 'package:flutter/material.dart';
 
@@ -22,44 +22,43 @@ class CommentsProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllComments(int idPost) async {
+  try{
     final response = await http.get(
         Uri.parse("http://${MyIP.ipAddress}:8888/comments?idPost=$idPost"),
         headers: {'Content-Type': 'application/json'});
     if (response.statusCode == 200) {
       try {
         List<dynamic> jsonData = json.decode(response.body);
+        Logger().d("kuku fetchAllComments");
 
-        _allComments =
-            jsonData.map((elem) => CommentStructure.fromList(elem)).toList();
+        _allComments = jsonData.map((elem) => CommentStructure.fromList(elem)).toList();
+
         notifyListeners();
       } catch (e) {
         throw Exception(e);
       }
     }
+  }  catch(e) {
+    throw Exception(e);
+  }
   }
 
   // Сейчас не меняется кол-во комментариев в списках постов
   Future<void> newComment(int idPost, String email) async {
-    Logger().d("я здесь");
-    if (commentText != "") {
-      final response = await http.post(
-          Uri.parse("http://${MyIP.ipAddress}:8888/comments/new"),
-          body: json.encode(
-              {'email': email, 'idPost': idPost, "textComment": commentText}),
-          headers: {'Content-Type': 'application/json'});
-      if (response.statusCode == 200) {
-        try {
-          List<dynamic> jsonData = json.decode(response.body);
-          _allComments =
-              jsonData.map((elem) => CommentStructure.fromList(elem)).toList();
-          _commentTextController.clear();
-          _commentText = '';
+    try {
+      if (commentText != "") {
+        await http.post(Uri.parse("http://${MyIP.ipAddress}:8888/comments/new"),
+            body: json.encode(
+                {'email': email, 'idPost': idPost, "textComment": commentText}),
+            headers: {'Content-Type': 'application/json'});
 
-          notifyListeners();
-        } catch (e) {
-          throw Exception(e);
-        }
+        _commentTextController.clear();
+        _commentText = '';
+
+        notifyListeners();
       }
+    } catch (e) {
+      throw Exception(e);
     }
   }
 }

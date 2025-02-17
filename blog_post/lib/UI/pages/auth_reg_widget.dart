@@ -1,7 +1,10 @@
+import 'package:blog_post/StateManager/authentification_model.dart';
 import 'package:blog_post/StateManager/post_provider.dart';
 import 'package:blog_post/StateManager/profile_provider.dart';
 import 'package:blog_post/UI/components/text_field_widget_auth.dart';
 import 'package:blog_post/UI/pages/home_screen.dart';
+import 'package:blog_post/UI/pages/re_entry.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,87 +16,101 @@ class AuthRegWidget extends StatelessWidget {
     ProfileStore profileStoreRead = context.read<ProfileStore>();
     ProfileStore profileStoreWatch = context.watch<ProfileStore>();
 
-    PostStore postStoreRead = context.read<PostStore>();
     PostStore postStoreWatch = context.watch<PostStore>();
+
+    AuthentificationModel authentificationModelRead =
+        context.read<AuthentificationModel>();
+    AuthentificationModel authentificationModelWatch =
+        context.watch<AuthentificationModel>();
 
     double mWidth = MediaQuery.of(context).size.width;
     double mHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-        body: Stack(
-          children: [
-            Container(color: const Color.fromRGBO(232, 216, 255, 1)),
-            Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                    height: mHeight * 0.76,
-                    decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color.fromRGBO(115, 63, 184, 1.0),
-                            Color.fromRGBO(181, 123, 255, 1.0)
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(30),
-                          bottomRight: Radius.circular(30))
-                    ),
-                  child: const Column(
-                    children: [
-                      Padding(
-                          padding: EdgeInsets.only(top: 70),
-                          child: Text("BlogPost",
-                            style: TextStyle(
-                                fontSize: 55,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Caveat',
-                                shadows: [
-                                  Shadow(
-                                      color: Color.fromRGBO(58, 36, 83, 1.0),
-                                      blurRadius: 10)
-                                ]),
-                          )),
+      body: Stack(
+        children: [
+          Container(color: const Color.fromRGBO(232, 216, 255, 1)),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 630,
+              decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color.fromRGBO(115, 63, 184, 1.0),
+                      Color.fromRGBO(181, 123, 255, 1.0)
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                )),
-            Center(
-                child: Container(
-                    height: mHeight * 0.5,
-                    width: mWidth * 0.97,
-                    decoration: const BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                              color: Color.fromRGBO(0, 0, 0, 0.6),
-                              spreadRadius: 6,
-                              blurRadius: 10,
-                              offset: Offset(0, 0))
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30))),
+              child: const Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 60),
+                    child: Text(
+                      "BlogPost",
+                      style: TextStyle(
+                        fontSize: 55,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Caveat',
+                        shadows: [
+                          Shadow(
+                              color: Color.fromRGBO(58, 36, 83, 1.0),
+                              blurRadius: 10)
                         ],
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(30),
-                          bottomRight: Radius.circular(30),
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        )),
-                    child: Column(children: [
-                      profileStoreWatch.isAuth
-                      ? const Text("Авторизация",
-                          style: TextStyle(
-                              fontSize: 35,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: 'Caveat'))
-                      : const Text(
-                          "Регистрация",
-                          style: TextStyle(
-                              fontSize: 35,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: 'Caveat'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Center(
+            child: Container(
+              height: 400,
+              width: 450,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.6),
+                      spreadRadius: 6,
+                      blurRadius: 10,
+                      offset: Offset(0, 0))
+                ],
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                children: [
+                  profileStoreWatch.isAuth
+                      ? const Padding(
+                          padding: EdgeInsets.only(top: 5),
+                          child: Text("Авторизация",
+                              style: TextStyle(
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'Caveat')))
+                      : const Padding(
+                          padding: EdgeInsets.only(top: 5),
+                          child: Text(
+                            "Регистрация",
+                            style: TextStyle(
+                                fontSize: 35,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Caveat'),
+                          ),
                         ),
-                      TextFieldWidget(
+                  TextFieldWidget(
                       controller: profileStoreWatch.getEmailController,
                       obscureText: null,
                       setParams: profileStoreRead.setEmail,
@@ -138,7 +155,8 @@ class AuthRegWidget extends StatelessWidget {
                               null)) ...[
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(116, 72, 186, 1.0),
+                            backgroundColor:
+                                const Color.fromRGBO(116, 72, 186, 1.0),
                             fixedSize: Size(mWidth * 0.3, mHeight * 0.05)),
                         onPressed: () async {
                           String? response;
@@ -148,13 +166,15 @@ class AuthRegWidget extends StatelessWidget {
                             response = await profileStoreWatch.sendDataReg();
                           }
                           if (response == null) {
+                            await authentificationModelRead
+                                .checkBiometryAvailability();
                             await postStoreWatch
                                 .fetchAllPosts(profileStoreWatch.getEmail);
                             profileStoreRead.setIsUserAuth(true);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => HomeScreen()));
+                                    builder: (context) => ReEntry()));
                             if (profileStoreWatch.isAuth) {
                               await profileStoreWatch.getDataAboutUser();
                               await postStoreWatch
@@ -165,7 +185,7 @@ class AuthRegWidget extends StatelessWidget {
                                 SnackBar(content: Text(response)));
                           }
                         },
-                        child: Text(
+                        child: const Text(
                           "Войти",
                           style: TextStyle(fontSize: 15, color: Colors.black),
                         ))
@@ -183,29 +203,37 @@ class AuthRegWidget extends StatelessWidget {
                               style: TextStyle(fontSize: 15))
                           : const Text("Авторизация",
                               style: TextStyle(fontSize: 15)))
-                ]))),
-        Positioned(
-          bottom: mHeight * 0.18,
-          left: mWidth * 0.15,
-          right: mWidth * 0.15,
-          top: mHeight * 0.77,
-          child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(116, 72, 186, 1.0),
+                ],
               ),
-              onPressed: () async {
-                await postStoreWatch.fetchAllPosts(null);
-                postStoreWatch.setCurrentTab("All");
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()));
-                profileStoreRead.setIsUserAuth(false);
-              },
-              child: Text(
-                "Войти без регистрации",
-                style: TextStyle(fontSize: 15, color: Colors.black),
-              )),
-        ),
-      ],
-    ));
+            ),
+          ),
+          Positioned(
+            bottom: 110,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(116, 72, 186, 1.0),
+                ),
+                onPressed: () async {
+                  await postStoreWatch.fetchAllPosts(null);
+                  postStoreWatch.setCurrentTab("All");
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HomeScreen()));
+                  profileStoreRead.setIsUserAuth(false);
+                },
+                child: const Text(
+                  "Войти без регистрации",
+                  style: TextStyle(fontSize: 15, color: Colors.black),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

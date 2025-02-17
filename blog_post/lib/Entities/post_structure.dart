@@ -8,7 +8,7 @@ class Posts {
   final Uint8List avatar;
   final int idPost;
   final String? headline;
-  final Uint8List? photoPost;
+  final Uint8List photoPost;
   final String? textPost;
   final DateTime datePublished;
   int? countLike;
@@ -36,13 +36,18 @@ class Posts {
     List<int> avatarList = json['avatar'] != null
         ? (json['avatar'] as List<dynamic>).map((e) => e as int).toList()
         : [];
+
+    List<int> photoPost = json['photo_post'] != null
+        ? (json['photo_post'] as List<dynamic>).map((e) => e as int).toList()
+        : [];
+
     return Posts(
       lastName: json['last_name'],
       name: json['name'],
       avatar: Uint8List.fromList(avatarList),
       idPost: json['id_post'],
       headline: json['headline'],
-      photoPost: json['photo_post'],
+      photoPost: Uint8List.fromList(photoPost),
       textPost: json['text_post'],
       datePublished: DateFormat('dd-MM-yyyy').parse(json['date_published']),
       countLike: json['count_like'],

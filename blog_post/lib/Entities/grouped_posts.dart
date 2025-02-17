@@ -1,4 +1,4 @@
-import 'package:blog_post/DTO/post_structure.dart';
+import 'package:blog_post/Entities/post_structure.dart';
 
 class GroupedPosts {
   final DateTime date;

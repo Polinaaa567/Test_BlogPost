@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:blog_post/DTO/profile_structure.dart';
+import 'package:blog_post/Entities/profile_structure.dart';
 import 'package:blog_post/configure/config.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +19,6 @@ class ProfileStore with ChangeNotifier {
     _isAuth = !_isAuth;
     notifyListeners();
   }
-
 
 
   final TextEditingController _emailController = TextEditingController();
@@ -220,14 +219,17 @@ class ProfileStore with ChangeNotifier {
 
   Future<dynamic> sendDataAboutUser() async {
     try {
-      dynamic jpgBytes = img.encodeJpg(_imageAvatar!);
+      List<int>? jpgBytes;
+      if (_imageAvatar != null) {
+        jpgBytes = img.encodeJpg(_imageAvatar!);
+      }
 
       final response = await http.put(
           Uri.parse("http://${MyIP.ipAddress}:8888/profile/save"),
           body: json.encode({
             'email': _email,
             "lastName": _lastName,
-            'avatar': jpgBytes,
+            'avatar': jpgBytes != null ? jpgBytes : (_bytes.isNotEmpty) ?_bytes : null ,
             'name': _name
           }),
           headers: {'Content-Type': 'application/json'});

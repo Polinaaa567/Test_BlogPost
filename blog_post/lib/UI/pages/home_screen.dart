@@ -1,10 +1,8 @@
 import 'package:blog_post/StateManager/home_screen_provider.dart';
 import 'package:blog_post/StateManager/profile_provider.dart';
-import 'package:blog_post/UI/pages/feed_posts.dart';
 import 'package:blog_post/UI/pages/feed_screen.dart';
 import 'package:blog_post/UI/pages/profile.dart';
 import 'package:blog_post/UI/pages/settigs.dart';
-import 'package:blog_post/UI/pages/viewing_post.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +21,7 @@ class HomeScreen extends StatelessWidget {
     ProfileStore profileStoreWatch = context.watch<ProfileStore>();
 
     final List<Widget> pages = [
-      FeedScreen(),
+      const FeedScreen(),
       if (profileStoreRead.isUserAuth) const ProfileScreen(),
       SettingsScreen(),
     ];
