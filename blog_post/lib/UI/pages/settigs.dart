@@ -1,3 +1,4 @@
+import 'package:blog_post/StateManager/authentification_model.dart';
 import 'package:blog_post/StateManager/home_screen_provider.dart';
 import 'package:blog_post/StateManager/post_provider.dart';
 import 'package:blog_post/StateManager/profile_provider.dart';
@@ -16,10 +17,14 @@ class SettingsScreen extends StatelessWidget {
 
     ProfileStore profileStoreRead = context.read<ProfileStore>();
 
+    AuthentificationModel authentificationModelRead =
+        context.read<AuthentificationModel>();
+
     HomeScreenProvider homeScreenProviderRead =
         context.read<HomeScreenProvider>();
 
-    return Center( child: SingleChildScrollView(
+    return Center(
+        child: SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
         child: Column(
@@ -27,67 +32,73 @@ class SettingsScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-                decoration: BoxDecoration(
-              color: const Color.fromRGBO(90, 64, 138, 1.0),
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 4.0,
-                  color: Colors.black.withOpacity(0.1),
-                ),
-              ],
-            ),
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                if (profileStoreRead.isUserAuth) ...[
-                  BuildMenuItemMy(
-                    text: "Профиль",
-                    onPressed: () {
-                      homeScreenProviderRead.setSelectedPagesIndex(1);
-                    },
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(90, 64, 138, 1.0),
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 4.0,
+                    color: Colors.black.withOpacity(0.1),
                   ),
-                  const SizedBox(height: 16),
-                  BuildMenuItemMy(text: "Уведомления", onPressed: () {}),
+                ],
+              ),
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  if (profileStoreRead.isUserAuth) ...[
+                    BuildMenuItemMy(
+                      text: "Профиль",
+                      onPressed: () {
+                        homeScreenProviderRead.setSelectedPagesIndex(1);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    BuildMenuItemMy(text: "Уведомления", onPressed: () {}),
+                    const SizedBox(height: 16),
+                    BuildMenuItemMy(
+                      text: "Удалить аккаунт",
+                      onPressed: () async {
+                        await profileStoreRead.deleteAccount();
+                        authentificationModelRead.cleanPrefs();
+                        profileStoreRead.setEmptyDataAuthorization();
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AuthRegWidget(),
+                          ),
+                          (Route<dynamic> route) => false,
+                        );
+                        homeScreenProviderRead.setSelectedPagesIndex(0);
+                      },
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   BuildMenuItemMy(
-                    text: "Удалить аккаунт",
-                    onPressed: () async {
-                      await profileStoreRead.deleteAccount();
+                    text: "Выход",
+                    onPressed: () {
                       profileStoreRead.setEmptyDataAuthorization();
-                      Navigator.push(
+                      authentificationModelRead.cleanPrefs();
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const AuthRegWidget(),
                         ),
+                        (Route<dynamic> route) => false,
                       );
                       homeScreenProviderRead.setSelectedPagesIndex(0);
                     },
                   ),
+                  const SizedBox(height: 32),
+                  const Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Text(
+                      "version 0.0.0",
+                      style: TextStyle(color: Colors.white, fontSize: 17),
+                    ),
+                  ),
                 ],
-                const SizedBox(height: 16),
-                BuildMenuItemMy(
-                  text: "Выход",
-                  onPressed: () {
-                    profileStoreRead.setEmptyDataAuthorization();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AuthRegWidget(),
-                      ),
-                    );
-                    homeScreenProviderRead.setSelectedPagesIndex(0);
-                  },
-                ),
-                const SizedBox(height: 32),
-                const Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Text("version 0.0.0", style: TextStyle(color: Colors.white, fontSize: 17),),
-                ),
-              ],
+              ),
             ),
-            ),
-
           ],
         ),
       ),
@@ -105,11 +116,9 @@ class BuildMenuItemMy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-        onPressed: onPressed,
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(Size(200, 50))
-        ),
-        child: Text(text, style: TextStyle(fontSize: 17)),
+      onPressed: onPressed,
+      style: ButtonStyle(minimumSize: WidgetStateProperty.all(Size(200, 50))),
+      child: Text(text, style: TextStyle(fontSize: 17)),
     );
   }
 }

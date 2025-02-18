@@ -20,7 +20,6 @@ class ProfileStore with ChangeNotifier {
     notifyListeners();
   }
 
-
   final TextEditingController _emailController = TextEditingController();
   TextEditingController get getEmailController => _emailController;
 
@@ -62,6 +61,7 @@ class ProfileStore with ChangeNotifier {
     _isUserAuth = !_isUserAuth;
     notifyListeners();
   }
+
   void setIsUserAuth(bool isUserAuth) {
     _isUserAuth = isUserAuth;
     notifyListeners();
@@ -224,15 +224,19 @@ class ProfileStore with ChangeNotifier {
         jpgBytes = img.encodeJpg(_imageAvatar!);
       }
 
-      final response = await http.put(
-          Uri.parse("http://${MyIP.ipAddress}:8888/profile/save"),
-          body: json.encode({
-            'email': _email,
-            "lastName": _lastName,
-            'avatar': jpgBytes != null ? jpgBytes : (_bytes.isNotEmpty) ?_bytes : null ,
-            'name': _name
-          }),
-          headers: {'Content-Type': 'application/json'});
+      final response = await http
+          .put(Uri.parse("http://${MyIP.ipAddress}:8888/profile/save"),
+              body: json.encode({
+                'email': _email,
+                "lastName": _lastName,
+                'avatar': jpgBytes != null
+                    ? jpgBytes
+                    : (_bytes.isNotEmpty)
+                        ? _bytes
+                        : null,
+                'name': _name
+              }),
+              headers: {'Content-Type': 'application/json'});
       if (response.body.contains("true")) {
         return null;
       } else {

@@ -7,23 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthentificationModel extends ChangeNotifier {
   final LocalAuthentication _auth = LocalAuthentication();
   LocalAuthentication get auth => _auth;
-  String _prefsEmail = "";
-  String _prefsPinCode = "";
-
-  String get prefsEmail => _prefsEmail;
-  String get prefsPinCode => _prefsPinCode;
-
-  void setPrefsEmail(String email) {
-    _prefsEmail = email;
-    _prefsPinCode = _pinCode;
-
-    notifyListeners();
-  }
 
   String _pinCode = "";
   String get pinCode => _pinCode;
   void setPinCode(String pinCode) {
     _pinCode = pinCode;
+    notifyListeners();
+  }
+
+  void cleanPinCode() {
+    _pinCode = "";
     notifyListeners();
   }
 
@@ -41,9 +34,6 @@ class AuthentificationModel extends ChangeNotifier {
     }
   }
 
-  TextEditingController _pinCodeController = TextEditingController();
-  TextEditingController get pinCodeController => _pinCodeController;
-
   String _authorizedState = 'Not Authorized';
   String get authorizedState => _authorizedState;
   void setAuthorizedState(String state) {
@@ -57,9 +47,6 @@ class AuthentificationModel extends ChangeNotifier {
     _isAuthenticating = state;
     notifyListeners();
   }
-
-  bool _useBiometry = false;
-  bool get useBiometry => _useBiometry;
 
   bool _canCheckBiometrics = false;
   bool get canCheckBiometrics => _canCheckBiometrics;
@@ -80,6 +67,8 @@ class AuthentificationModel extends ChangeNotifier {
 
       Logger().d("availableBiometrics: $availableBiometrics");
       _canCheckBiometrics = hasTouchId;
+      Logger().d("hasTouchId: $hasTouchId");
+
       notifyListeners();
     } catch (e) {
       debugPrint('Ошибка проверки биометрии: $e');
@@ -88,16 +77,13 @@ class AuthentificationModel extends ChangeNotifier {
     }
   }
 
-  void toggleBiometry() {
-    _useBiometry = !_useBiometry;
-    notifyListeners();
-  }
-
   Future<void> savePreferences(String email) async {
     final prefs = await SharedPreferences.getInstance();
 
     try {
-      // await prefs.setBool('use_biometry', _useBiometry);
+      if(_isAuthenticating && _isCancelled == false) {
+        await prefs.setBool('use_biometry', _isAuthenticating);
+      }
       await prefs.setString('email', email);
       await prefs.setString('pin_code', _pinCode);
 
@@ -118,6 +104,12 @@ class AuthentificationModel extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String stringValue = prefs.getString('email') ?? '';
     return stringValue;
+  }
+
+  Future<bool> readUseBiometryFromPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool boolValue = prefs.getBool("use_biometry") ?? false;
+    return boolValue;
   }
 
   bool _isCancelled = false;
@@ -158,5 +150,12 @@ class AuthentificationModel extends ChangeNotifier {
 
       return;
     }
+  }
+
+  Future<void> cleanPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    _pinCode = "";
+    notifyListeners();
   }
 }

@@ -46,12 +46,14 @@ class FeedScreen extends StatelessWidget {
                   ),
                 ),
                 const Expanded(
-                    child: TabBarView(
-                        physics: NeverScrollableScrollPhysics(),
-                        children: [
+                  child: TabBarView(
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
                       TabsViewAllMy(),
                       TabsViewAllMy(),
-                    ]))
+                    ],
+                  ),
+                ),
               ],
             ),
           )
@@ -59,7 +61,7 @@ class FeedScreen extends StatelessWidget {
             scrollDirection: Axis.vertical,
             child: Column(
               children: [
-                 const Padding(
+                const Padding(
                     padding: EdgeInsets.only(top: 10),
                     child: Text(
                       "Лента постов",
@@ -92,8 +94,9 @@ class TabsViewAllMy extends StatelessWidget {
     PostStore postStoreWatch = context.watch<PostStore>();
 
     String currentTab = postStoreRead.getCurrentTab;
-    return Stack(children: [
-      SingleChildScrollView(
+    return Stack(
+      children: [
+        SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Column(
             children: [
@@ -114,8 +117,10 @@ class TabsViewAllMy extends StatelessWidget {
                         : [],
               )
             ],
-          )),
-      if (profileStoreRead.isUserAuth) const AddPostButton()
-    ]);
+          ),
+        ),
+        if (profileStoreRead.isUserAuth) const AddPostButton()
+      ],
+    );
   }
 }

@@ -39,16 +39,16 @@ class ReEntryOrAuth extends StatelessWidget {
     AuthentificationModel authentificationModelWatch =
     context.watch<AuthentificationModel>();
 
-    ProfileStore profileStoreRead = context.read<ProfileStore>();
-
-    return FutureBuilder<Map<String, String?>>(
+    return FutureBuilder<Map<String, dynamic>>(
       future: Future.wait([
         authentificationModelRead.readPinCodeFromPref(),
         authentificationModelRead.readEmailFromPref(),
+        authentificationModelRead.readUseBiometryFromPref()
       ]).then((values) {
         return {
           'pinCode': values[0] as String?,
           'email': values[1] as String?,
+          'useBiometry': values[2] as bool?,
         };
       }),
       builder: (context, snapshot) {
@@ -57,8 +57,9 @@ class ReEntryOrAuth extends StatelessWidget {
         } else {
           final pinCode = snapshot.data?['pinCode'];
           final email = snapshot.data?['email'];
+          final useBiometry = snapshot.data?['useBiometry'];
           if (pinCode != null && pinCode.isNotEmpty && email != null && email.isNotEmpty) {
-            return ReEntry(pinCode, email);
+            return ReEntry(pinCode, email, useBiometry, true);
           } else {
             return const AuthRegWidget();
           }
