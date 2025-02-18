@@ -1,6 +1,7 @@
 import 'package:blog_post/StateManager/authentification_model.dart';
 import 'package:blog_post/StateManager/comment_probider.dart';
 import 'package:blog_post/StateManager/home_screen_provider.dart';
+import 'package:blog_post/StateManager/notification_model.dart';
 import 'package:blog_post/StateManager/post_provider.dart';
 import 'package:blog_post/StateManager/profile_provider.dart';
 import 'package:blog_post/UI/pages/auth_reg_widget.dart';
@@ -15,7 +16,8 @@ void main() => runApp(MultiProvider(
         ChangeNotifierProvider(create: (context) => PostStore()),
         ChangeNotifierProvider(create: (context) => HomeScreenProvider()),
         ChangeNotifierProvider(create: (context) => CommentsProvider()),
-        ChangeNotifierProvider(create: (context) => AuthentificationModel())
+        ChangeNotifierProvider(create: (context) => AuthentificationModel()),
+        ChangeNotifierProvider(create: (context) => NotificationModel())
       ],
       child: const BlogPost(),
     ));

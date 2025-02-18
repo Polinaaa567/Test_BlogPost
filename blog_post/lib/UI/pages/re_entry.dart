@@ -27,6 +27,7 @@ class ReEntry extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Icon(Icons.arr),
             Padding(
               padding: EdgeInsets.only(top: 30),
               child: (state != true)
@@ -47,7 +48,7 @@ class ReEntry extends StatelessWidget {
                           color:
                               authentificationModelWatch.pinCode.length > index
                                   ? Colors.green
-                                  : Colors.red,
+                                  : Colors.black,
                           shape: BoxShape.circle),
                     );
                   }),
@@ -73,18 +74,34 @@ class ReEntry extends StatelessWidget {
                             if (authentificationModelRead.pinCode == pinCode) {
                               profileStoreRead.setIsUserAuth(true);
                               profileStoreRead.setEmail(email ?? "");
-
-                              await postStoreWatch
-                                  .fetchAllPosts(profileStoreRead.getEmail);
-                              await profileStoreRead.getDataAboutUser();
-                              await postStoreWatch
-                                  .fetchMyPosts(profileStoreRead.getEmail);
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) =>
-                                          const HomeScreen()));
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                              try {
+                                await postStoreWatch
+                                    .fetchAllPosts(profileStoreRead.getEmail);
+                                await profileStoreRead.getDataAboutUser();
+                                await postStoreWatch
+                                    .fetchMyPosts(profileStoreRead.getEmail);
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) =>
+                                            const HomeScreen()));
+                              } catch (e) {
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Ошибка при загрузке данных')),
+                                );
+                              }
                             } else {
+                              authentificationModelRead.cleanPinCode();
                               ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text("Неправильный Пин-код")));
@@ -122,17 +139,34 @@ class ReEntry extends StatelessWidget {
                       if (authentificationModelRead.pinCode.length == 4) {
                         if (state == true) {
                           if (authentificationModelRead.pinCode == pinCode) {
-                            profileStoreRead.setIsUserAuth(true);
-                            profileStoreRead.setEmail(email ?? "");
-                            await postStoreWatch
-                                .fetchAllPosts(profileStoreRead.getEmail);
-                            await profileStoreRead.getDataAboutUser();
-                            await postStoreWatch
-                                .fetchMyPosts(profileStoreRead.getEmail);
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (builder) => const HomeScreen()));
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                            try {
+                              profileStoreRead.setIsUserAuth(true);
+                              profileStoreRead.setEmail(email ?? "");
+                              await postStoreWatch
+                                  .fetchAllPosts(profileStoreRead.getEmail);
+                              await profileStoreRead.getDataAboutUser();
+                              await postStoreWatch
+                                  .fetchMyPosts(profileStoreRead.getEmail);
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) =>
+                                          const HomeScreen()));
+                            } catch (e) {
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Ошибка при загрузке данных')),
+                              );
+                            }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text("Неправильный Пин-код")));
@@ -208,7 +242,7 @@ class ReEntry extends StatelessWidget {
                                 decoration: BoxDecoration(
                                     border: Border.all(color: Colors.grey),
                                     borderRadius: BorderRadius.circular(10)),
-                                child: Center(
+                                child: const Center(
                                   child: Icon(
                                     Icons.fingerprint,
                                     size: 24,
@@ -216,11 +250,11 @@ class ReEntry extends StatelessWidget {
                                 ),
                               )
                         : Container(
-                            margin: EdgeInsets.all(10),
+                            margin: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(10)),
-                            child: Center(
+                            child: const Center(
                               child: Icon(
                                 Icons.backspace,
                                 size: 24,

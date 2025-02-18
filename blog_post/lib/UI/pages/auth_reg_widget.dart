@@ -217,13 +217,34 @@ class AuthRegWidget extends StatelessWidget {
                   backgroundColor: const Color.fromRGBO(116, 72, 186, 1.0),
                 ),
                 onPressed: () async {
-                  await postStoreWatch.fetchAllPosts(null);
-                  postStoreWatch.setCurrentTab("All");
-                  Navigator.push(
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+
+                  try {
+                    await postStoreWatch.fetchAllPosts(null);
+                    postStoreWatch.setCurrentTab("All");
+                    profileStoreRead.setIsUserAuth(false);
+
+                    Navigator.of(context).pop();
+
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const HomeScreen()));
-                  profileStoreRead.setIsUserAuth(false);
+                        builder: (context) => const HomeScreen(),
+                      ),
+                    );
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Ошибка при загрузке данных')),
+                    );
+                  }
                 },
                 child: const Text(
                   "Войти без регистрации",

@@ -3,6 +3,7 @@ import 'package:blog_post/StateManager/home_screen_provider.dart';
 import 'package:blog_post/StateManager/post_provider.dart';
 import 'package:blog_post/StateManager/profile_provider.dart';
 import 'package:blog_post/UI/pages/auth_reg_widget.dart';
+import 'package:blog_post/UI/pages/notification.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -53,7 +54,10 @@ class SettingsScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 16),
-                    BuildMenuItemMy(text: "Уведомления", onPressed: () {}),
+                    BuildMenuItemMy(text: "Уведомления", onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen()));
+                    }),
                     const SizedBox(height: 16),
                     BuildMenuItemMy(
                       text: "Удалить аккаунт",

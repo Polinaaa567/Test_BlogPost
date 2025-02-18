@@ -7,6 +7,7 @@ import 'package:blog_post/UI/components/comment_widget.dart';
 import 'package:blog_post/UI/pages/new_edit_post.dart';
 import 'package:blog_post/UI/pages/viewing_post.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class ExpandablePostGroupWidget extends StatelessWidget {
@@ -18,6 +19,7 @@ class ExpandablePostGroupWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     PostStore postStoreRead = context.read<PostStore>();
     PostStore postStoreWatch = context.watch<PostStore>();
+    ProfileStore profileStoreRead = context.read<ProfileStore>();
 
     String currentTab = postStoreRead.getCurrentTab;
     var borderRadius = const BorderRadius.all(Radius.circular(32));
@@ -44,7 +46,7 @@ class ExpandablePostGroupWidget extends StatelessWidget {
       if (groupedPosts.isExpanded)
         Column(
             children: groupedPosts.posts
-                .map((post) => PostListWidget(elem: post))
+                .map((post) =>  PostListWidget(elem: post))
                 .toList())
     ]);
   }
@@ -70,6 +72,7 @@ class PostListWidget extends StatelessWidget {
 
     double mWidth = MediaQuery.of(context).size.width;
     double mHeight = MediaQuery.of(context).size.height;
+    String currentTab = postStoreRead.getCurrentTab;
 
     return Column(
       children: [

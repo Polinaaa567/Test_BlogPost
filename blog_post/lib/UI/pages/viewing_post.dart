@@ -24,11 +24,15 @@ class ViewingPostScreen extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: () async {
-                  await postStoreWatch.fetchAllPosts(profileStoreWatch.getEmail);
-                  await postStoreWatch.fetchMyPosts(profileStoreWatch.getEmail);
+                  // await postStoreWatch.fetchAllPosts(profileStoreWatch.getEmail);
+                  // await postStoreWatch.fetchMyPosts(profileStoreWatch.getEmail);
+                  postStoreWatch.setCurrentTab(postStoreWatch.getCurrentTab);
+
                   postStoreWatch.setIsOnePostInfo();
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const HomeScreen()));
+                  Navigator.pushAndRemoveUntil(context,
+                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                        (Route<dynamic> route) => false,
+                  );
                 },
                 icon: const Icon(Icons.close),
               ),
