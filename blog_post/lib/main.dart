@@ -1,11 +1,10 @@
-import 'package:blog_post/StateManager/authentification_model.dart';
-import 'package:blog_post/StateManager/comment_probider.dart';
-import 'package:blog_post/StateManager/home_screen_provider.dart';
-import 'package:blog_post/StateManager/notification_model.dart';
-import 'package:blog_post/StateManager/post_provider.dart';
-import 'package:blog_post/StateManager/profile_provider.dart';
-import 'package:blog_post/UI/pages/auth_reg_widget.dart';
-import 'package:blog_post/UI/pages/re_entry.dart';
+import 'package:blog_post/provider/authentication/authentication_model.dart';
+import 'package:blog_post/provider/comments/comment_model.dart';
+import 'package:blog_post/provider/navigation_bar/home_screen_model.dart';
+import 'package:blog_post/provider/notification/notification_model.dart';
+import 'package:blog_post/provider/feed_posts/post_model.dart';
+import 'package:blog_post/provider/profile/profile_model.dart';
+import 'package:blog_post/UI/auth_reg/re_entry_or_auth_future_builder.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +15,7 @@ void main() => runApp(MultiProvider(
         ChangeNotifierProvider(create: (context) => PostStore()),
         ChangeNotifierProvider(create: (context) => HomeScreenProvider()),
         ChangeNotifierProvider(create: (context) => CommentsProvider()),
-        ChangeNotifierProvider(create: (context) => AuthentificationModel()),
+        ChangeNotifierProvider(create: (context) => AuthenticationModel()),
         ChangeNotifierProvider(create: (context) => NotificationModel())
       ],
       child: const BlogPost(),
@@ -27,46 +26,9 @@ class BlogPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: ReEntryOrAuth(),
     );
   }
 }
 
-class ReEntryOrAuth extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    AuthentificationModel authentificationModelRead =
-    context.read<AuthentificationModel>();
-    AuthentificationModel authentificationModelWatch =
-    context.watch<AuthentificationModel>();
-
-    return FutureBuilder<Map<String, dynamic>>(
-      future: Future.wait([
-        authentificationModelRead.readPinCodeFromPref(),
-        authentificationModelRead.readEmailFromPref(),
-        authentificationModelRead.readUseBiometryFromPref()
-      ]).then((values) {
-        return {
-          'pinCode': values[0] as String?,
-          'email': values[1] as String?,
-          'useBiometry': values[2] as bool?,
-        };
-      }),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const AuthRegWidget();
-        } else {
-          final pinCode = snapshot.data?['pinCode'];
-          final email = snapshot.data?['email'];
-          final useBiometry = snapshot.data?['useBiometry'];
-          if (pinCode != null && pinCode.isNotEmpty && email != null && email.isNotEmpty) {
-            return ReEntry(pinCode, email, useBiometry, true);
-          } else {
-            return const AuthRegWidget();
-          }
-        }
-      },
-    );
-  }
-}
