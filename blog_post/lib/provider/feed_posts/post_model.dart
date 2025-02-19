@@ -337,6 +337,9 @@ class PostStore with ChangeNotifier {
     _idPost = 0;
     _isPublished = false;
     _postOneInfo = [];
+    _postsAll = [];
+    _postsMy =[];
+    _currentTab = "My";
     notifyListeners();
   }
 
