@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'storage/storage.dart';
-import 'controllers/auth_routes.dart';
-import 'controllers/comments_routes.dart';
-import 'controllers/post_routes.dart';
-import 'controllers/profile_routes.dart';
+import 'package:dartserver/controllers/auth_routes.dart';
+import 'package:dartserver/controllers/comments_routes.dart';
+import 'package:dartserver/controllers/post_routes.dart';
+import 'package:dartserver/controllers/profile_routes.dart';
+import 'package:dartserver/storage/storage.dart';
 
 void main() async {
   final db = FactoryDatabase.createDatatabase();

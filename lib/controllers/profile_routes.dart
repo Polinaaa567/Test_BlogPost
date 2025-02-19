@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
-import '../storage/storage.dart';
+import 'package:dartserver/storage/storage.dart';
 
 class ProfileRoutes {
   final IDatabase db;

@@ -1,5 +1,5 @@
+import 'package:dartserver/configure/config.dart';
 import 'package:postgres/postgres.dart';
-import '../configure/config.dart';
 
 class FactoryDatabase {
   static IDatabase createDatatabase() {
