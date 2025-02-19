@@ -10,13 +10,13 @@
 
 <h2 align="center">Зависимости</h2>
 <h3 align="center">Клиент</h3>
-Для работы приложения необходимо в pubspec.yaml добавить: provider, email_validator, image_picker, image, http, intl, local_auth, pin_code_fields, shared_preferences
+Для работы приложения необходимо в pubspec.yaml добавить: provider, email_validator, image_picker, image, http, intl, local_auth, pin_code_fields, shared_preferences и запустить команду в консоли 'pub get'
 
 <h3 align="center">Сервер</h3>
-Для работы приложения необходимо в pubspec.yaml добавить: postgres, http, intl
+Для работы приложения необходимо в pubspec.yaml добавить: postgres, http, intl и запустить команду в консоли 'pub get'
 
 <h2 align="center">Как запустить</h2>
-Чтобы запустить проект необходимо в бд иметь 4 таблицы для users, posts, comments, post_like. В ветке localserver находится сервер, который нужно дополнить конфигурационной информацией о бд (host, database, port, username, password) и запустить код из ./bin/dartserver.dart. Сервер запустится на порту 8888. Далее для прокта flutter нужно прописать в lib/configs/config.dart: class MyIP {static const String ipAddress = "your_ip_address где запустили сервер";}. После уже можно запускать проект, главное чтобы сервер и клиент были в одной сети.
+Чтобы запустить проект необходимо в бд иметь 4 таблицы для users, posts, comments, post_like. Для их создания в PostgreSQL необходимо запустить скрипт в ветке localserver в ./scripts/create_db.sql (написан для роли postgres). Также нужно дополнить конфигурационной информацией о бд (host, database, port, username, password) и запустить код из ./bin/dartserver.dart. Сервер запустится на порту 8888. Далее для прокта flutter нужно прописать в lib/configs/config.dart: class MyIP {static const String ipAddress = "your_ip_address где запустили сервер";}. После уже можно запускать проект, главное чтобы сервер и клиент были в одной сети.
 
 <h2 align="center">Основные возможности</h2>
 
