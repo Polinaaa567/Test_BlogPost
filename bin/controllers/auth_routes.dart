@@ -10,10 +10,10 @@ class AuthRoutes {
 
   Future<void> handleRequest(HttpRequest request) async {
     switch (request.uri.path) {
-      case "/auth/register":
+      case "/auth/register": // +
         await _register(request);
         break;
-      case "/auth/login":
+      case "/auth/login": // +
         await _login(request);
         break;
     }

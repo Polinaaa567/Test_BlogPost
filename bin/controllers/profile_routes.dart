@@ -3,20 +3,20 @@ import 'dart:convert';
 
 import '../storage/storage.dart';
 
-class ProfileRoutes { 
+class ProfileRoutes {
   final IDatabase db;
 
   ProfileRoutes(this.db);
 
   Future<void> handleRequest(HttpRequest request) async {
     switch (request.uri.path) {
-      case "/profile":
+      case "/profile": // +
         await _infoAboutUser(request);
         break;
-      case "/profile/save":
+      case "/profile/save": // +
         await _saveDataAboutUser(request);
         break;
-      case "/profile/delete":
+      case "/profile/delete": // +
         await _deleteUser(request);
         break;
     }
