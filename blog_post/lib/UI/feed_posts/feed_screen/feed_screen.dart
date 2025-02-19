@@ -1,7 +1,7 @@
 import 'package:blog_post/provider/notification/notification_model.dart';
 import 'package:blog_post/provider/feed_posts/post_model.dart';
 import 'package:blog_post/provider/profile/profile_model.dart';
-import 'package:blog_post/UI/feed_posts/feed_screen/add_post_button_widget.dart';
+import 'package:blog_post/UI/feed_posts/create_post/add_post_button_widget.dart';
 import 'package:blog_post/UI/feed_posts/feed_screen/post_group_widget.dart';
 import 'package:blog_post/UI/feed_posts/feed_screen/search_text_field_widget.dart';
 

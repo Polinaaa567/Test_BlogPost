@@ -337,8 +337,15 @@ class PostStore with ChangeNotifier {
     _idPost = 0;
     _isPublished = false;
     _postOneInfo = [];
+    notifyListeners();
+  }
+
+  void clearAll() {
+    clearPostsEdit();
+    clearSearchAll();
+    clearSearchMy();
     _postsAll = [];
-    _postsMy =[];
+    _postsMy = [];
     _currentTab = "My";
     notifyListeners();
   }

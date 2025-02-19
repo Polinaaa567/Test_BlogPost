@@ -65,7 +65,7 @@ class ReEntry extends StatelessWidget {
                       onTap: () async {
                         String digit = (index + 1).toString();
                         authenticationModelWatch.appendToPinCode(digit);
-                        if (authenticationModelRead.pinCode.length == 4) {
+                        if (authenticationModelWatch.pinCode.length == 4) {
                           if (state == true) {
                             if (authenticationModelRead.pinCode ==
                                 authenticationModelRead.pinCodePrefs) {
@@ -94,11 +94,13 @@ class ReEntry extends StatelessWidget {
                                     .fetchMyPosts(profileStoreRead.email);
                                 await profileStoreRead.fetchDataAboutUser();
 
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (builder) =>
-                                            const NavigationBarMenu()));
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) =>
+                                          const NavigationBarMenu()),
+                                  (Route<dynamic> route) => false,
+                                );
                               } catch (e) {
                                 Navigator.of(context).pop();
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -108,19 +110,21 @@ class ReEntry extends StatelessWidget {
                                 );
                               }
                             } else {
-                              authenticationModelRead.cleanPinCode();
                               ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text("Неправильный Пин-код")));
+                              authenticationModelWatch.cleanPinCode();
                             }
                           } else {
                             authenticationModelRead
                                 .savePreferences(profileStoreRead.email);
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (builder) =>
-                                        const NavigationBarMenu()));
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (builder) =>
+                                      const NavigationBarMenu()),
+                              (Route<dynamic> route) => false,
+                            );
                           }
                         }
                       },
@@ -145,7 +149,7 @@ class ReEntry extends StatelessWidget {
                     onTap: () async {
                       authenticationModelRead.appendToPinCode("0");
                       if (authenticationModelRead.pinCode.length == 4) {
-                        if (state==true) {
+                        if (state == true) {
                           if (authenticationModelRead.pinCode ==
                               authenticationModelRead.pinCodePrefs) {
                             showDialog(
@@ -173,11 +177,13 @@ class ReEntry extends StatelessWidget {
                                   .fetchMyPosts(profileStoreRead.email);
                               await profileStoreRead.fetchDataAboutUser();
 
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) =>
-                                          const NavigationBarMenu()));
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) =>
+                                        const NavigationBarMenu()),
+                                (Route<dynamic> route) => false,
+                              );
                             } catch (e) {
                               Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -194,11 +200,13 @@ class ReEntry extends StatelessWidget {
                         } else {
                           authenticationModelRead
                               .savePreferences(profileStoreRead.email);
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) =>
-                                      const NavigationBarMenu()));
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (builder) =>
+                                    const NavigationBarMenu()),
+                            (Route<dynamic> route) => false,
+                          );
                         }
                       }
                     },
@@ -219,25 +227,44 @@ class ReEntry extends StatelessWidget {
                     onTap: () async {
                       if (authenticationModelRead.pinCode.isEmpty &&
                           (authenticationModelRead.canCheckBiometrics ||
-                              authenticationModelRead.isUseBiometry == true)) {
+                              authenticationModelRead.isUseBiometry == true) &&
+                          authenticationModelRead.isAuthenticating == false) {
                         await authenticationModelWatch.authenticate();
 
                         if (authenticationModelRead.isAuthenticating == true &&
                             authenticationModelRead.isCancelled != true &&
                             state == true) {
-                          profileStoreRead.setIsUserAuth(true);
-                          profileStoreRead
-                              .setEmail(authenticationModelRead.email);
-                          await postStoreWatch
-                              .fetchAllPosts(profileStoreRead.email);
-                          await profileStoreRead.fetchDataAboutUser();
-                          await postStoreWatch
-                              .fetchMyPosts(profileStoreRead.email);
-                          Navigator.pushReplacement(
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                          try {
+                            profileStoreRead.setIsUserAuth(true);
+                            profileStoreRead
+                                .setEmail(authenticationModelRead.email);
+                            await postStoreWatch
+                                .fetchAllPosts(profileStoreRead.email);
+                            await profileStoreRead.fetchDataAboutUser();
+                            await postStoreWatch
+                                .fetchMyPosts(profileStoreRead.email);
+
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                   builder: (builder) =>
-                                      const NavigationBarMenu()));
+                                      const NavigationBarMenu()),
+                              (Route<dynamic> route) => false,
+                            );
+                          } catch (e) {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Ошибка при загрузке данных')),
+                            );
+                          }
                         }
                       } else {
                         authenticationModelRead.removeLastDigit();
@@ -245,37 +272,66 @@ class ReEntry extends StatelessWidget {
                     },
                     child: (!authenticationModelWatch.isAuthenticating &&
                             authenticationModelRead.pinCode.isEmpty)
-                        ? (state == true &&
-                                authenticationModelRead.isUseBiometry)
-                            ? Container(
-                                margin: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.fingerprint,
-                                    size: 24,
-                                  ),
-                                ),
-                              )
-                            : Container(
-                                margin: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.fingerprint,
-                                    size: 24,
-                                  ),
-                                ),
-                              )
+                        ? (state == true)
+                            ? (authenticationModelRead.isUseBiometry)
+                                ? Container(
+                                    margin: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.fingerprint,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    margin: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.backspace,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  )
+                            : (authenticationModelRead.canCheckBiometrics)
+                                ? Container(
+                                    margin: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.fingerprint,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    margin: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius:
+                                            BorderRadius.circular(10),),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.backspace,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  )
                         : Container(
                             margin: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(10),),
                             child: const Center(
                               child: Icon(
                                 Icons.backspace,

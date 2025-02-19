@@ -164,6 +164,7 @@ class AuthRegWidget extends StatelessWidget {
                           response = await profileStoreWatch.sendDataReg();
                         }
                         if (response == null) {
+                          postStoreWatch.setCurrentTab("My");
                           await authenticationModelRead
                               .checkBiometryAvailability();
                           await postStoreWatch
@@ -239,11 +240,12 @@ class AuthRegWidget extends StatelessWidget {
 
                     Navigator.of(context).pop();
 
-                    await Navigator.push(
+                    await Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const NavigationBarMenu(),
                       ),
+                      (Route<dynamic> route) => false,
                     );
                   } catch (e) {
                     Navigator.of(context).pop();

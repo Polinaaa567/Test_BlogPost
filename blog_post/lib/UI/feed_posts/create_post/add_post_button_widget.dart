@@ -17,6 +17,7 @@ class AddPostButton extends StatelessWidget {
         child: FloatingActionButton(
           onPressed: () {
             postStoreRead.setIsThisEdit(false);
+            postStoreRead.clearPostsEdit();
             Navigator.push(
                 context,
                 MaterialPageRoute(

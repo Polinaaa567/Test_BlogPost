@@ -11,9 +11,9 @@ class ModalCommentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CommentsProvider commentStoreWatch = context.watch<CommentsProvider>();
     ProfileStore profileStoreRead = context.read<ProfileStore>();
     CommentsProvider commentStoreRead = context.read<CommentsProvider>();
+    CommentsProvider commentStoreWatch = context.watch<CommentsProvider>();
 
     return Container(
       color: const Color.fromRGBO(213, 201, 230, 1.0),
@@ -58,8 +58,7 @@ class ModalCommentWidget extends StatelessWidget {
                     child: Column(
                       children: [
                         Column(
-                          children: commentStoreWatch.allComments!
-                              .map(
+                          children: commentStoreWatch.allComments!.map(
                                 (comment) => Column(
                                   children: [
                                     Row(
@@ -115,8 +114,8 @@ class ModalCommentWidget extends StatelessWidget {
                                                 ],
                                               ),
                                               const Padding(
-                                                  padding:
-                                                      EdgeInsets.only(top: 4)),
+                                                padding: EdgeInsets.only(top: 4),
+                                              ),
                                               Container(
                                                 constraints:
                                                     const BoxConstraints(
@@ -154,45 +153,47 @@ class ModalCommentWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                  )
+                  ),
+                  if (profileStoreRead.isUserAuth)
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      child: TextFormField(
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                        controller: commentStoreWatch.commentTextController,
+                        onChanged: commentStoreRead.setCommentText,
+                        decoration: InputDecoration(
+                            labelText: "Комментарий",
+                            suffixIcon: IconButton(
+                                onPressed: () async {
+                                  final lastName = profileStoreRead.lastName;
+                                  final name = profileStoreRead.name;
+
+                                  (lastName != null &&
+                                      lastName != '' &&
+                                      name != null &&
+                                      name != '')
+                                      ? [
+                                    await commentStoreWatch.newComment(
+                                        idPost, profileStoreRead.email),
+                                    await commentStoreWatch
+                                        .fetchAllComments(idPost)
+                                  ]
+                                      : ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Введите имя и фамилию"),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.send))),
+                      ),
+                    ),
                 ],
               ),
             ),
-          ),
-          if (profileStoreRead.isUserAuth)
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: commentStoreWatch.commentTextController,
-                onChanged: commentStoreRead.setCommentText,
-                decoration: InputDecoration(
-                    labelText: "Комментарий",
-                    suffixIcon: IconButton(
-                        onPressed: () async {
-                          final lastName = profileStoreRead.lastName;
-                          final name = profileStoreRead.name;
 
-                          (lastName != null &&
-                                  lastName != '' &&
-                                  name != null &&
-                                  name != '')
-                              ? [
-                                  await commentStoreWatch.newComment(
-                                      idPost, profileStoreRead.email),
-                                  await commentStoreWatch
-                                      .fetchAllComments(idPost)
-                                ]
-                              : ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Введите имя и фамилию"),
-                                  ),
-                                );
-                        },
-                        icon: const Icon(Icons.send))),
-              ),
-            ),
+          ),
+
         ],
       ),
     );

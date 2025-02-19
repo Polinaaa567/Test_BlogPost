@@ -1,3 +1,5 @@
+import 'package:blog_post/UI/settings/build_menu_item.dart';
+import 'package:blog_post/provider/feed_posts/post_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +21,8 @@ class SettingsScreen extends StatelessWidget {
         context.read<AuthenticationModel>();
     HomeScreenProvider homeScreenProviderRead =
         context.read<HomeScreenProvider>();
+    PostStore postStoreRead = context.read<PostStore>();
+
 
     return Center(
       child: SingleChildScrollView(
@@ -64,6 +68,7 @@ class SettingsScreen extends StatelessWidget {
                       BuildMenuItem(
                         text: "Удалить аккаунт",
                         onPressed: () async {
+                          postStoreRead.clearAll();
                           await profileStoreRead.deleteAccount();
                           await authenticationModelRead.cleanPrefs();
                           await notificationModelRead.deleteAllPref();
@@ -85,6 +90,7 @@ class SettingsScreen extends StatelessWidget {
                     BuildMenuItem(
                       text: "Выход",
                       onPressed: () async {
+                        postStoreRead.clearAll();
                         profileStoreRead.setEmptyDataAuthorization();
                         await authenticationModelRead.cleanPrefs();
                         await notificationModelRead.deleteAllPref();
@@ -119,18 +125,3 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class BuildMenuItem extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-
-  const BuildMenuItem({super.key, required this.text, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ButtonStyle(minimumSize: WidgetStateProperty.all(Size(200, 50))),
-      child: Text(text, style: const TextStyle(fontSize: 17)),
-    );
-  }
-}
