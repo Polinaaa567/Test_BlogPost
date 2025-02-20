@@ -17,6 +17,7 @@
 
 <h2 align="center">Как запустить</h2>
 Чтобы запустить проект необходимо в бд иметь 4 таблицы для users, posts, comments, post_like. Для их создания есть скрипт в ветке localserver в ./scripts/create_db.sql (написан для роли postgres). Запустить можно из самой папки в cmd  psql -U postgres -f create_db.sql. Также нужно создать файл в ./lib/configure/config.data и дополнить его конфигурационной информацией о бд (host, database = blogpost, port, username, password) и запустить код из ./bin/dartserver.dart. Сервер запустится на порту 8888. 
+
 В ветке master не хватает файлов, configs/config.dart из-за этого приложение не запускается. В нём необходимо прописать: class MyIP {static const String ipAddress = "your_ip_address где запустили сервер";}. После уже можно запускать проект, главное чтобы сервер и клиент были подключены к одной локальной сети.
 
 <h2 align="center">Основные возможности</h2>
